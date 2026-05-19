@@ -1,7 +1,7 @@
 package com.my_conquest.conquest_backend.controller;
 
-import com.my_conquest.conquest_backend.dtos.LoginRequest;
-import com.my_conquest.conquest_backend.dtos.LoginResponse;
+import com.my_conquest.conquest_backend.dto.LoginRequest;
+import com.my_conquest.conquest_backend.dto.LoginResponse;
 import com.my_conquest.conquest_backend.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,14 +20,8 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/sign-in")
-    public ResponseEntity<LoginResponse> signIn(@RequestBody @Valid LoginRequest request) {
-        return ResponseEntity.ok(authService.signIn(request));
+    public LoginResponse signIn(@RequestBody @Valid LoginRequest request) {
+        return authService.signIn(request);
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<?> getMe(@AuthenticationPrincipal Jwt jwt) {
-        String userId = jwt.getSubject();
-        List<String> roles = jwt.getClaimAsStringList("roles");
-        return ResponseEntity.ok(userId);
-    }
 }

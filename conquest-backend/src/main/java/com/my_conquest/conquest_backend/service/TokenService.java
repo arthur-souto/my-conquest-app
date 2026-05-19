@@ -1,6 +1,6 @@
 package com.my_conquest.conquest_backend.service;
 
-import com.my_conquest.conquest_backend.dtos.LoginResponse;
+import com.my_conquest.conquest_backend.dto.LoginResponse;
 import com.my_conquest.conquest_backend.entity.Permission;
 import com.my_conquest.conquest_backend.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,6 @@ public class TokenService {
     private static final Integer TOKEN_HOURS_EXPIRATION = 24;
 
     public LoginResponse generateToken(User user) {
-
         final var token = buildToken(user);
         final var tokenAsString = encodeToken(token);
 
@@ -35,12 +34,10 @@ public class TokenService {
     }
 
     private String encodeToken(JwtClaimsSet token) {
-
         return jwtEncoder.encode(JwtEncoderParameters.from(token)).getTokenValue();
     }
 
     private JwtClaimsSet buildToken(User user) {
-
         final var now = Instant.now();
 
         return JwtClaimsSet.builder()
