@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.UUID;
 
 @Service
@@ -22,13 +24,13 @@ public class TagService {
     private final TagRepository tagRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public IdResponse createTag(CreateTagRequest req, UUID userId) {
         if (tagRepository.findByUserIdAndName(userId, req.name()).isPresent()) {
-            throw new ConflictException("Tag com nome '" + req.name() + "' já existe.");
+            throw new ConflictException("Tag names '" + req.name() + "' is already used.");
         }
 
-        final var user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
+        final var user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found."));
 
         Tag tag = CreateTagRequest.toEntity(req);
         tag.setUser(user);
@@ -36,14 +38,15 @@ public class TagService {
         return new IdResponse(tagRepository.save(tag).getId());
     }
 
+    @Transactional(readOnly = true)
     public Page<TagResponse> findAll(UUID userId, Pageable pageable) {
         return tagRepository.findAllByUserId(userId, pageable)
                 .map(TagResponse::from);
     }
 
+    @Transactional
     public IdResponse updateTag(UUID userId, UUID tagId, UpdateTagRequest req) {
-        final var tag = tagRepository.findByIdAndUserId(tagId, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Tag não encontrada."));
+        final var tag = tagRepository.findByIdAndUserId(tagId, userId).orElseThrow(() -> new ResourceNotFoundException("Tag not found."));
 
         if(req.colorHex() != null) {tag.setColorHex(req.colorHex());}
         if(req.name() != null) {tag.setName(req.name());}
@@ -53,9 +56,9 @@ public class TagService {
         );
     }
 
+    @Transactional
     public void delete(UUID userId, UUID tagId) {
-        final var tag = tagRepository.findById(tagId)
-                .orElseThrow(() -> new ResourceNotFoundException("Tag not found."));
+        final var tag = tagRepository.findById(tagId).orElseThrow(() -> new ResourceNotFoundException("Tag not found."));
 
         if (!tag.getUser().getId().equals(userId)) {
             throw new ResourceNotFoundException("Tag not found.");

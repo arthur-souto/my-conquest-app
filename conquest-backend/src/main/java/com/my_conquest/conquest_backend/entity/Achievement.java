@@ -23,8 +23,7 @@ public class Achievement {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private Group group;
 
     @Column(nullable = false, length = 255)
     private String title;

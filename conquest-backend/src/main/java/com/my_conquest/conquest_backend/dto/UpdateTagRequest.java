@@ -4,9 +4,9 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record UpdateTagRequest(
-        @Size(min = 1, message = "O nome não pode ser vazio")
+        @Size(min = 1, message = "Name not be empty")
         String name,
-        @Pattern(regexp = "^#[0-9A-Fa-f]{6}$", message = "Cor inválida, use formato hex: #RRGGBB")
+        @Pattern(regexp = "^#[0-9A-Fa-f]{6}$", message = "Invalid color, use format hex: #RRGGBB")
         String colorHex
 ) {
 }

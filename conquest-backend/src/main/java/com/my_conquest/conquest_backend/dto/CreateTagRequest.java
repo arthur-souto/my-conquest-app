@@ -5,9 +5,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 public record CreateTagRequest(
-        @NotBlank(message = "Nome é necessário")
+        @NotBlank(message = "Name is required")
         String name,
-        @Pattern(regexp = "^#[0-9A-Fa-f]{6}$", message = "Cor inválida, use formato hex: #RRGGBB")
+        @Pattern(regexp = "^#[0-9A-Fa-f]{6}$", message = "Invalid color, use format hex: #RRGGBB")
         String colorHex
 ) {
 

@@ -8,6 +8,7 @@ import com.my_conquest.conquest_backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +18,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional(readOnly = true)
     public LoginResponse signIn(LoginRequest req) {
         final var user = userRepository.findByEmail(req.email())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
