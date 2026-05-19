@@ -1,4 +1,5 @@
 import axios from "axios";
+import AsyncStorageImpl from "./storage";
 
 export const api = axios.create({
   baseURL: process.env.EXPO_PUBLIC_API_URL,
@@ -6,4 +7,22 @@ export const api = axios.create({
 });
 
 
-// Intercepta as respostas para lidar com erros globalmente
+
+api.interceptors.request.use(
+  async (req) => {
+
+    const token = await AsyncStorageImpl.getItem(AsyncStorageImpl.TOKEN_KEY);
+   
+    if (token) {
+
+    req.headers.Authorization = `Bearer ${JSON.parse(token).accessToken}`;
+
+    }
+    
+    return req
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
