@@ -1,7 +1,7 @@
 package com.my_conquest.conquest_backend.service;
 
-import com.my_conquest.conquest_backend.dtos.LoginRequest;
-import com.my_conquest.conquest_backend.dtos.LoginResponse;
+import com.my_conquest.conquest_backend.dto.LoginRequest;
+import com.my_conquest.conquest_backend.dto.LoginResponse;
 import com.my_conquest.conquest_backend.exception.ResourceNotFoundException;
 import com.my_conquest.conquest_backend.exception.UnauthorizedException;
 import com.my_conquest.conquest_backend.repository.UserRepository;
@@ -18,7 +18,6 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
 
     public LoginResponse signIn(LoginRequest req) {
-
         final var user = userRepository.findByEmail(req.email())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
 

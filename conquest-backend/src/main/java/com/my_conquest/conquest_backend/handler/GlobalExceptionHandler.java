@@ -1,6 +1,6 @@
 package com.my_conquest.conquest_backend.handler;
 
-import com.my_conquest.conquest_backend.dtos.ErrorResponse;
+import com.my_conquest.conquest_backend.dto.ErrorResponse;
 import com.my_conquest.conquest_backend.exception.BadRequestException;
 import com.my_conquest.conquest_backend.exception.ConflictException;
 import com.my_conquest.conquest_backend.exception.ResourceNotFoundException;
