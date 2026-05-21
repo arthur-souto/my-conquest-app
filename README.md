@@ -1,57 +1,76 @@
 # Conquest
 
-> Registre e compartilhe conquistas com seu grupo.
+> Record and share achievements with your group.
 
-Conquest é um aplicativo mobile que permite criar grupos, registrar conquistas com evidências e organizá-las por tags.
+Conquest is a mobile app that lets you create groups, log achievements with evidence, and organize them using tags.
 
 ## Screenshots
 
-| Login | Home | Grupos | Conquistas | Criar Conquista | Tags |
-|-------|------|--------|------------|-----------------|------|
-| <img src="docs/login.jpg" width="200"/> | <img src="docs/home.jpg" width="200"/> | <img src="docs/grupos.jpg" width="200"/> | <img src="docs/conquistas.jpg" width="200"/> | <img src="docs/criar-conquista.jpg" width="200"/> | <img src="docs/tags.jpg" width="200"/> |
+<div align="center">
 
-## Funcionalidades
+  <img src="docs/login.jpg" width="230"/>
+  &nbsp;&nbsp;
+  <img src="docs/home.jpg" width="230"/>
+  <br/><sub>Login &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Home</sub>
 
-- **Autenticação** — Login seguro via JWT
-- **Grupos** — Crie e gerencie grupos de conquistas
-- **Conquistas** — Registre conquistas dentro de um grupo
-- **Tags** — Organize conquistas com tags personalizadas
-- **Evidências** — Anexe fotos ou documentos como prova das conquistas
+  <br/><br/>
+
+  <img src="docs/grupos.jpg" width="230"/>
+  &nbsp;&nbsp;
+  <img src="docs/conquistas.jpg" width="230"/>
+  <br/><sub>Groups &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Achievements</sub>
+
+  <br/><br/>
+
+  <img src="docs/criar-conquista.jpg" width="230"/>
+  &nbsp;&nbsp;
+  <img src="docs/tags.jpg" width="230"/>
+  <br/><sub>Create Achievement &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Tags</sub>
+
+</div>
+
+## Features
+
+- **Authentication** — Secure login via JWT
+- **Groups** — Create and manage achievement groups
+- **Achievements** — Log achievements within a group
+- **Tags** — Organize achievements with custom tags
+- **Evidence** — Attach photos or documents as proof of achievements
 
 ## Stack
 
 ### Mobile (`conquest-app`)
 
-| Tecnologia | Descrição |
-|-----------|-----------|
-| Expo 54 | Plataforma React Native |
-| Expo Router v4 | Roteamento baseado em arquivos |
-| GlueStack UI v3 | Biblioteca de componentes |
-| NativeWind v4 | Utilitários Tailwind para RN |
-| Supabase JS | Storage de arquivos |
-| Axios | Cliente HTTP |
+| Technology | Description |
+|-----------|-------------|
+| Expo 54 | React Native platform |
+| Expo Router v4 | File-based routing |
+| GlueStack UI v3 | Component library |
+| NativeWind v4 | Tailwind utilities for RN |
+| Supabase JS | File storage |
+| Axios | HTTP client |
 
 ### Backend (`conquest-backend`)
 
-| Tecnologia | Descrição |
-|-----------|-----------|
-| Spring Boot | Framework principal |
-| Java | Linguagem |
+| Technology | Description |
+|-----------|-------------|
+| Spring Boot | Main framework |
+| Java | Language |
 | JPA / Hibernate | ORM |
-| JWT | Autenticação |
+| JWT | Authentication |
 
-## Estrutura do Projeto
+## Project Structure
 
 ```
 project-1/
-├── conquest-app/          # Aplicativo React Native (Expo)
+├── conquest-app/          # React Native app (Expo)
 │   ├── app/
-│   │   ├── (auth)/        # Tela de login
-│   │   ├── (tabs)/        # Tabs principais (grupos, tags)
-│   │   └── group/         # Detalhes do grupo e conquistas
-│   ├── services/          # Camada de serviços HTTP
-│   └── lib/               # Utilitários
-└── conquest-backend/      # API REST (Spring Boot)
+│   │   ├── (auth)/        # Login screen
+│   │   ├── (tabs)/        # Main tabs (groups, tags)
+│   │   └── group/         # Group details and achievements
+│   ├── services/          # HTTP service layer
+│   └── lib/               # Utilities
+└── conquest-backend/      # REST API (Spring Boot)
     └── src/main/java/
         ├── controller/
         ├── service/
@@ -64,39 +83,39 @@ project-1/
 
 ### Auth
 
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| POST | `/v1/auth/sign-in` | Login |
+| Method | Route | Description |
+|--------|-------|-------------|
+| POST | `/v1/auth/sign-in` | Sign in |
 
-### Grupos
+### Groups
 
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| POST | `/v1/groups` | Criar grupo |
-| GET | `/v1/groups` | Listar grupos |
-| DELETE | `/v1/groups/{id}` | Deletar grupo |
+| Method | Route | Description |
+|--------|-------|-------------|
+| POST | `/v1/groups` | Create group |
+| GET | `/v1/groups` | List groups |
+| DELETE | `/v1/groups/{id}` | Delete group |
 
 ### Tags
 
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| POST | `/v1/tags` | Criar tag |
-| GET | `/v1/tags` | Listar tags |
-| DELETE | `/v1/tags/{id}` | Deletar tag |
+| Method | Route | Description |
+|--------|-------|-------------|
+| POST | `/v1/tags` | Create tag |
+| GET | `/v1/tags` | List tags |
+| DELETE | `/v1/tags/{id}` | Delete tag |
 
-### Conquistas
+### Achievements
 
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| POST | `/v1/achievements/{groupId}` | Criar conquista |
-| GET | `/v1/achievements/{groupId}` | Listar conquistas do grupo |
-| DELETE | `/v1/achievements/{groupId}/{achievementId}` | Deletar conquista |
-| POST | `/v1/achievements/{groupId}/{achievementId}/tags/{tagId}` | Adicionar tag à conquista |
-| DELETE | `/v1/achievements/{groupId}/{achievementId}/tags/{tagId}` | Remover tag da conquista |
-| POST | `/v1/achievements/{groupId}/{achievementId}/evidences` | Adicionar evidência |
-| DELETE | `/v1/achievements/{groupId}/{achievementId}/evidences/{evidenceId}` | Remover evidência |
+| Method | Route | Description |
+|--------|-------|-------------|
+| POST | `/v1/achievements/{groupId}` | Create achievement |
+| GET | `/v1/achievements/{groupId}` | List group achievements |
+| DELETE | `/v1/achievements/{groupId}/{achievementId}` | Delete achievement |
+| POST | `/v1/achievements/{groupId}/{achievementId}/tags/{tagId}` | Add tag to achievement |
+| DELETE | `/v1/achievements/{groupId}/{achievementId}/tags/{tagId}` | Remove tag from achievement |
+| POST | `/v1/achievements/{groupId}/{achievementId}/evidences` | Add evidence |
+| DELETE | `/v1/achievements/{groupId}/{achievementId}/evidences/{evidenceId}` | Remove evidence |
 
-## Como Rodar
+## Getting Started
 
 ### Backend
 
