@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,10 +51,28 @@ public class Achievement {
         joinColumns = @JoinColumn(name = "achievement_id"),
         inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
-    private List<Tag> tags;
+    private List<Tag> tags = new ArrayList<>();
 
     @OneToMany(mappedBy = "achievement", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Evidence> evidences;
+    private List<Evidence> evidences = new ArrayList<>();
+
+    public void addTag(Tag tag) {
+        this.tags.add(tag);
+    }
+
+    public void removeTag(Tag tag) {
+        this.tags.remove(tag);
+    }
+
+    public void addEvidence(Evidence evidence) {
+        this.evidences.add(evidence);
+        evidence.setAchievement(this);
+    }
+
+    public void removeEvidence(Evidence evidence) {
+        this.evidences.remove(evidence);
+        evidence.setAchievement(null);
+    }
 
     @PrePersist
     private void prePersist() {

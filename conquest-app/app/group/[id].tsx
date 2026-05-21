@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ConquistasTab } from "./conquistas-tab";
 
 const TABS = ["Visão Geral", "Conquistas"] as const;
 type Tab = (typeof TABS)[number];
@@ -31,14 +32,6 @@ function OverviewTab({ id, description }: { id: string; description?: string }) 
   );
 }
 
-function PlaceholderTab({ label }: { label: string }) {
-  return (
-    <View className="flex-1 items-center justify-center gap-3">
-      <Feather name="clock" size={28} color="#333333" />
-      <Text className="text-[#666666] text-[13px]">{label} em breve</Text>
-    </View>
-  );
-}
 
 export default function GroupScreen() {
   const router = useRouter();
@@ -92,7 +85,7 @@ export default function GroupScreen() {
         {activeTab === "Visão Geral" && (
           <OverviewTab id={id} description={description} />
         )}
-        {activeTab === "Conquistas" && <PlaceholderTab label="Conquistas" />}
+        {activeTab === "Conquistas" && <ConquistasTab groupId={id} />}
       </View>
     </View>
   );

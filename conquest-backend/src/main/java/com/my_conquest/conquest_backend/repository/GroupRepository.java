@@ -13,6 +13,8 @@ import java.util.UUID;
 
 public interface GroupRepository extends JpaRepository<Group, UUID> {
 
+    boolean existsByIdAndUserId(UUID id, UUID userId);
+
     @Query("""
     SELECT 
     g.id as id,
