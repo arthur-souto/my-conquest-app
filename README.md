@@ -31,7 +31,7 @@ Conquest is a mobile app that lets you create groups, log achievements with evid
 
 ## Features
 
-- **Authentication** — Secure login via JWT
+- **Authentication** — Keycloak SSO via PKCE OAuth2 with silent token refresh
 - **Groups** — Create and manage achievement groups
 - **Achievements** — Log achievements within a group
 - **Tags** — Organize achievements with custom tags
@@ -49,6 +49,8 @@ Conquest is a mobile app that lets you create groups, log achievements with evid
 | NativeWind v4 | Tailwind utilities for RN |
 | Supabase JS | File storage |
 | Axios | HTTP client |
+| expo-auth-session | PKCE OAuth2 / Keycloak login |
+| expo-web-browser | In-app browser for auth redirect |
 
 ### Backend (`conquest-backend`)
 
@@ -57,7 +59,8 @@ Conquest is a mobile app that lets you create groups, log achievements with evid
 | Spring Boot | Main framework |
 | Java | Language |
 | JPA / Hibernate | ORM |
-| JWT | Authentication |
+| Keycloak | Identity provider (SSO) |
+| Spring OAuth2 Resource Server | JWT validation via Keycloak JWKS |
 
 ## Project Structure
 
@@ -78,6 +81,40 @@ project-1/
         ├── dto/
         └── repository/
 ```
+
+## Authentication Flow
+
+Conquest uses Keycloak as the identity provider with the **PKCE Authorization Code** flow, so no client secret is ever stored in the app.
+
+```
+User taps "Entrar"
+      │
+      ▼
+expo-auth-session opens Keycloak login page in browser
+      │
+      ▼ (user authenticates on Keycloak)
+Keycloak redirects back with ?code=...
+      │
+      ▼
+App exchanges code + code_verifier → Keycloak token endpoint
+      │
+      ▼
+Receives access_token + refresh_token → saved in AsyncStorage
+      │
+      ▼
+Every API request sends: Authorization: Bearer <access_token>
+      │
+      ▼  (on 401)
+Axios interceptor calls Keycloak with refresh_token → new access_token
+```
+
+### Backend token handling
+
+The Spring Boot backend is configured as an **OAuth2 Resource Server**. On every authenticated request:
+
+1. Spring validates the JWT signature via Keycloak's JWKS endpoint (`issuer-uri`).
+2. `UserRequestFilter` reads `sub` (Keycloak UUID), `name`, and `email` from the token claims.
+3. If the user doesn't exist in the database yet, it is created automatically (first-login provisioning).
 
 ## API Endpoints
 
@@ -119,12 +156,31 @@ project-1/
 
 ### Backend
 
+Create a `.env` or set the environment variables:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `KEYCLOAK_URI` | `http://localhost:8080/realms/conquest_realm` | Keycloak issuer URI for JWT validation |
+| `DB_URL` | `jdbc:postgresql://localhost:5432/conquest_db` | Database connection |
+| `DB_USERNAME` | `conquest_dev` | DB user |
+| `DB_PASSWORD` | `1234` | DB password |
+
 ```bash
+docker compose up -d   # start PostgreSQL
 cd conquest-backend
 ./mvnw spring-boot:run
 ```
 
 ### Mobile
+
+Create `conquest-app/.env`:
+
+```env
+EXPO_PUBLIC_API_URL=http://localhost:8081
+EXPO_PUBLIC_KEYCLOAK_URL=http://localhost:8080
+EXPO_PUBLIC_KEYCLOAK_REALM=conquest_realm
+EXPO_PUBLIC_KEYCLOAK_CLIENT_ID=conquest-app
+```
 
 ```bash
 cd conquest-app
