@@ -1,4 +1,4 @@
-package com.my_conquest.conquest_backend.dto;
+package com.my_conquest.conquest_backend.dto.request;
 
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;

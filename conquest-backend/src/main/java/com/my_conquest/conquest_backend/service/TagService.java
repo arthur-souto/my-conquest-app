@@ -1,9 +1,9 @@
 package com.my_conquest.conquest_backend.service;
 
-import com.my_conquest.conquest_backend.dto.CreateTagRequest;
-import com.my_conquest.conquest_backend.dto.IdResponse;
-import com.my_conquest.conquest_backend.dto.TagResponse;
-import com.my_conquest.conquest_backend.dto.UpdateTagRequest;
+import com.my_conquest.conquest_backend.dto.request.CreateTagRequest;
+import com.my_conquest.conquest_backend.dto.response.IdResponse;
+import com.my_conquest.conquest_backend.dto.response.TagResponse;
+import com.my_conquest.conquest_backend.dto.request.UpdateTagRequest;
 import com.my_conquest.conquest_backend.entity.Tag;
 import com.my_conquest.conquest_backend.exception.ConflictException;
 import com.my_conquest.conquest_backend.exception.ResourceNotFoundException;
@@ -26,11 +26,11 @@ public class TagService {
 
     @Transactional
     public IdResponse createTag(CreateTagRequest req, UUID userId) {
-        if (tagRepository.findByUserIdAndName(userId, req.name()).isPresent()) {
+        if (tagRepository.findByUserKeyCloakIdAndName(userId, req.name()).isPresent()) {
             throw new ConflictException("Tag names '" + req.name() + "' is already used.");
         }
 
-        final var user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found."));
+        final var user = userRepository.findByKeyCloakId(userId).orElseThrow(() -> new ResourceNotFoundException("User not found."));
 
         Tag tag = CreateTagRequest.toEntity(req);
         tag.setUser(user);
@@ -40,13 +40,13 @@ public class TagService {
 
     @Transactional(readOnly = true)
     public Page<TagResponse> findAll(UUID userId, Pageable pageable) {
-        return tagRepository.findAllByUserId(userId, pageable)
+        return tagRepository.findAllByUserKeyCloakId(userId, pageable)
                 .map(TagResponse::from);
     }
 
     @Transactional
     public IdResponse updateTag(UUID userId, UUID tagId, UpdateTagRequest req) {
-        final var tag = tagRepository.findByIdAndUserId(tagId, userId).orElseThrow(() -> new ResourceNotFoundException("Tag not found."));
+        final var tag = tagRepository.findByIdAndUserKeyCloakId(tagId, userId).orElseThrow(() -> new ResourceNotFoundException("Tag not found."));
 
         if(req.colorHex() != null) {tag.setColorHex(req.colorHex());}
         if(req.name() != null) {tag.setName(req.name());}
@@ -58,11 +58,7 @@ public class TagService {
 
     @Transactional
     public void delete(UUID userId, UUID tagId) {
-        final var tag = tagRepository.findById(tagId).orElseThrow(() -> new ResourceNotFoundException("Tag not found."));
-
-        if (!tag.getUser().getId().equals(userId)) {
-            throw new ResourceNotFoundException("Tag not found.");
-        }
+        final var tag = tagRepository.findByIdAndUserKeyCloakId(tagId, userId).orElseThrow(() -> new ResourceNotFoundException("Tag not found."));
 
         tagRepository.delete(tag);
     }

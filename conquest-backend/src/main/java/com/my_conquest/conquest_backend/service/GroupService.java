@@ -1,10 +1,9 @@
 package com.my_conquest.conquest_backend.service;
 
-import com.my_conquest.conquest_backend.dto.CreateGroupRequest;
-import com.my_conquest.conquest_backend.dto.GroupResponse;
-import com.my_conquest.conquest_backend.dto.IdResponse;
-import com.my_conquest.conquest_backend.dto.UpdateGroupRequest;
-import com.my_conquest.conquest_backend.entity.Group;
+import com.my_conquest.conquest_backend.dto.request.CreateGroupRequest;
+import com.my_conquest.conquest_backend.dto.response.GroupResponse;
+import com.my_conquest.conquest_backend.dto.response.IdResponse;
+import com.my_conquest.conquest_backend.dto.request.UpdateGroupRequest;
 import com.my_conquest.conquest_backend.exception.ConflictException;
 import com.my_conquest.conquest_backend.exception.ResourceNotFoundException;
 import com.my_conquest.conquest_backend.exception.UnauthorizedException;
@@ -27,11 +26,10 @@ public class GroupService {
 
     @Transactional
     public IdResponse createGroup(CreateGroupRequest req, UUID userId) {
-        if(groupRepository.existsByNameAndUserId(req.name().trim().toLowerCase(), userId)) {
+        if(groupRepository.existsByNameAndUserKeyCloakId(req.name().trim().toLowerCase(), userId)) {
             throw new ConflictException("Name already used.");
         }
-
-        final var user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found."));
+        final var user = userRepository.findByKeyCloakId(userId).orElseThrow(() -> new ResourceNotFoundException("User not found."));
 
         final var group = CreateGroupRequest.toEntity(req);
         group.setUser(user);
@@ -41,14 +39,14 @@ public class GroupService {
 
     @Transactional(readOnly = true)
     public Page<GroupResponse> findMyGroups(UUID userId, Pageable pageable) {
-        return groupRepository.findAllByUserId(userId, pageable).map(GroupResponse::toResponse);
+        return groupRepository.findAllByKeyCloakId(userId, pageable).map(GroupResponse::toResponse);
     }
 
     @Transactional
     public IdResponse updateGroup(UpdateGroupRequest req, UUID userId, UUID groupId) {
-        final var group = groupRepository.findByIdAndUserId(groupId, userId).orElseThrow(() -> new ResourceNotFoundException("Group not found"));
+        final var group = groupRepository.findByIdAndUserKeyCloakId(groupId, userId).orElseThrow(() -> new ResourceNotFoundException("Group not found"));
 
-        if(!group.getUser().getId().equals(userId)) {
+        if(!group.getUser().getKeyCloakId().equals(userId)) {
             throw new UnauthorizedException("Access denied: you do not own this resource");
         }
 
@@ -65,9 +63,9 @@ public class GroupService {
 
     @Transactional
     public void  deleteGroup(UUID userId, UUID groupId) {
-        final var group = groupRepository.findByIdAndUserId(groupId, userId).orElseThrow(() -> new ResourceNotFoundException("Group not found"));
+        final var group = groupRepository.findByIdAndUserKeyCloakId(groupId, userId).orElseThrow(() -> new ResourceNotFoundException("Group not found"));
 
-        if(!group.getUser().getId().equals(userId)) {
+        if(!group.getUser().getKeyCloakId().equals(userId)) {
             throw new UnauthorizedException("Access Denied: you do not own this resource");
         }
 

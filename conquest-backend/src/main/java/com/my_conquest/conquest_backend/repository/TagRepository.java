@@ -1,6 +1,6 @@
 package com.my_conquest.conquest_backend.repository;
 
-import com.my_conquest.conquest_backend.dto.TagSummary;
+import com.my_conquest.conquest_backend.dto.response.TagSummary;
 import com.my_conquest.conquest_backend.entity.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,13 +14,11 @@ import java.util.UUID;
 
 public interface TagRepository extends JpaRepository<Tag, UUID> {
 
-    List<Tag> findByUserId(UUID userId);
+    Page<Tag> findAllByUserKeyCloakId(UUID userId, Pageable pageable);
 
-    Page<Tag> findAllByUserId(UUID userId, Pageable pageable);
+    Optional<Tag> findByUserKeyCloakIdAndName(UUID userId, String name);
 
-    Optional<Tag> findByUserIdAndName(UUID userId, String name);
-
-    Optional<Tag> findByIdAndUserId(UUID id, UUID userId);
+    Optional<Tag> findByIdAndUserKeyCloakId(UUID id, UUID userId);
 
     @Query("""
     SELECT a.id as achievementId, t.id as id, t.name as name, t.colorHex as colorHex

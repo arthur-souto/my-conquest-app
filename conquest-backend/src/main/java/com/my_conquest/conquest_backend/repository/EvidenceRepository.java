@@ -1,6 +1,6 @@
 package com.my_conquest.conquest_backend.repository;
 
-import com.my_conquest.conquest_backend.dto.EvidenceSummary;
+import com.my_conquest.conquest_backend.dto.response.EvidenceSummary;
 import com.my_conquest.conquest_backend.entity.Evidence;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

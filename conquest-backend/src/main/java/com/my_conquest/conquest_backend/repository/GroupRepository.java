@@ -1,6 +1,6 @@
 package com.my_conquest.conquest_backend.repository;
 
-import com.my_conquest.conquest_backend.dto.GroupSummary;
+import com.my_conquest.conquest_backend.dto.response.GroupSummary;
 import com.my_conquest.conquest_backend.entity.Group;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public interface GroupRepository extends JpaRepository<Group, UUID> {
 
-    boolean existsByIdAndUserId(UUID id, UUID userId);
+    boolean existsByIdAndUserKeyCloakId(UUID id, UUID userId);
 
     @Query("""
     SELECT 
@@ -24,12 +24,12 @@ public interface GroupRepository extends JpaRepository<Group, UUID> {
     COUNT(a) as achievementsCount     
     FROM Group g
     LEFT JOIN g.achievements a 
-    WHERE g.user.id =:userId
+    WHERE g.user.keyCloakId =:keyCloakId
     GROUP BY g.id, g.name, g.description, g.createdAt 
     """)
-    Page<GroupSummary> findAllByUserId(@Param("userId") UUID userId, Pageable pageable);
+    Page<GroupSummary> findAllByKeyCloakId(@Param("keyCloakId") UUID keyCloakId, Pageable pageable);
 
-    Optional<Group> findByIdAndUserId(UUID id, UUID userId);
+    Optional<Group> findByIdAndUserKeyCloakId(UUID id, UUID userId);
 
-    boolean existsByNameAndUserId(String name, UUID userId);
+    boolean existsByNameAndUserKeyCloakId(String name, UUID userId);
 }

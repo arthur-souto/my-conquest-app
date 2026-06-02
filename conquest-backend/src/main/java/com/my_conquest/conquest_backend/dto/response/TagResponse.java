@@ -1,4 +1,4 @@
-package com.my_conquest.conquest_backend.dto;
+package com.my_conquest.conquest_backend.dto.response;
 
 import com.my_conquest.conquest_backend.entity.Tag;
 

@@ -1,4 +1,4 @@
-package com.my_conquest.conquest_backend.dto;
+package com.my_conquest.conquest_backend.dto.request;
 
 import com.my_conquest.conquest_backend.entity.Tag;
 import jakarta.validation.constraints.NotBlank;

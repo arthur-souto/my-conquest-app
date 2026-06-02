@@ -8,21 +8,39 @@ export const api = axios.create({
 
 
 
-api.interceptors.request.use(
-  async (req) => {
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      const raw = await AsyncStorageImpl.getItem(AsyncStorageImpl.TOKEN_KEY);
+      if (!raw) return Promise.reject(error);
+      
+      const { refreshToken } = JSON.parse(raw);
+      
+      const res = await fetch(`${process.env.EXPO_PUBLIC_KEYCLOAK_URL}/realms/${process.env.EXPO_PUBLIC_KEYCLOAK_REALM}/protocol/openid-connect/token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          grant_type: "refresh_token",
+          client_id: process.env.EXPO_PUBLIC_KEYCLOAK_CLIENT_ID!,
+          refresh_token: refreshToken,
+        }).toString(),
+      });
 
-    const token = await AsyncStorageImpl.getItem(AsyncStorageImpl.TOKEN_KEY);
-   
-    if (token) {
+      const data = await res.json();
 
-    req.headers.Authorization = `Bearer ${JSON.parse(token).accessToken}`;
-
+      if (data.access_token) {
+        await AsyncStorageImpl.setItem(
+          AsyncStorageImpl.TOKEN_KEY,
+          JSON.stringify({ 
+            accessToken: data.access_token,
+            refreshToken: data.refresh_token 
+          })
+        );
+        error.config.headers.Authorization = `Bearer ${data.access_token}`;
+        return api(error.config);
+      }
     }
-    
-    return req
-  },
-  (error) => {
     return Promise.reject(error);
   }
 );
-

@@ -260,6 +260,7 @@ export default function TagsScreen() {
   const [sheetVisible, setSheetVisible] = useState(false);
   const [editingTag, setEditingTag] = useState<Tag | null>(null);
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState("");
 
   const showError = (msg: string) => {
     toast.show({
@@ -358,11 +359,38 @@ export default function TagsScreen() {
       <View className="flex-row items-center px-5 pt-4 pb-3">
         <Text className="flex-1 text-white text-[22px] font-bold">Tags</Text>
         <Pressable
+          onPress={() => { setLoading(true); fetchTags(0, false); }}
+          disabled={loading}
+          hitSlop={8}
+          className="p-2 mr-2 active:opacity-50"
+        >
+          <Ionicons name="refresh" size={18} color={loading ? "#333333" : "#666666"} />
+        </Pressable>
+        <Pressable
           onPress={() => { setEditingTag(null); setSheetVisible(true); }}
           className="bg-white rounded-lg px-[14px] py-2 active:opacity-75"
         >
           <Text className="text-[#0a0a0a] text-[13px] font-semibold">+ Nova</Text>
         </Pressable>
+      </View>
+
+      {/* Search */}
+      <View className="flex-row items-center bg-[#111111] border border-[#1f1f1f] rounded-lg mx-5 mb-3 px-4">
+        <Ionicons name="search" size={14} color="#444444" />
+        <TextInput
+          value={search}
+          onChangeText={setSearch}
+          placeholder="Buscar tags..."
+          placeholderTextColor="#333333"
+          autoCapitalize="none"
+          autoCorrect={false}
+          className="flex-1 text-white text-[14px] py-[11px] ml-2"
+        />
+        {search.length > 0 && (
+          <Pressable onPress={() => setSearch("")} hitSlop={8}>
+            <Ionicons name="close" size={16} color="#444444" />
+          </Pressable>
+        )}
       </View>
 
       {/* List */}
@@ -372,7 +400,7 @@ export default function TagsScreen() {
         </View>
       ) : (
         <FlatList
-          data={tags}
+          data={tags.filter(t => t.name.toLowerCase().includes(search.toLowerCase()))}
           keyExtractor={item => item.id}
           renderItem={({ item, index }) => (
             <TagItem
