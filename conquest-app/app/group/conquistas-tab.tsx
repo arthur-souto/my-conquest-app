@@ -851,6 +851,7 @@ export function ConquistasTab({ groupId }: { groupId: string }) {
 
   const [tagPickerVisible, setTagPickerVisible] = useState(false);
   const [tagPickerTargetId, setTagPickerTargetId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
 
   const showError = (msg: string) =>
@@ -1115,11 +1116,38 @@ export function ConquistasTab({ groupId }: { groupId: string }) {
           {loading ? "" : `${achievements.length} conquista${achievements.length !== 1 ? "s" : ""}`}
         </Text>
         <Pressable
+          onPress={() => { setLoading(true); fetchAchievements(0, false); }}
+          disabled={loading}
+          hitSlop={8}
+          className="p-1.5 mr-2 active:opacity-50"
+        >
+          <Feather name="refresh-cw" size={14} color={loading ? "#333333" : "#666666"} />
+        </Pressable>
+        <Pressable
           onPress={() => { setEditingAchievement(null); setSheetVisible(true); }}
           className="bg-white rounded-md px-3 py-1.5 active:opacity-75"
         >
           <Text className="text-[#0a0a0a] text-[12px] font-semibold">+ Nova</Text>
         </Pressable>
+      </View>
+
+      {/* Search */}
+      <View className="flex-row items-center bg-[#111111] border border-[#1f1f1f] rounded-lg mx-5 my-3 px-4">
+        <Feather name="search" size={14} color="#444444" />
+        <TextInput
+          value={search}
+          onChangeText={setSearch}
+          placeholder="Buscar conquistas..."
+          placeholderTextColor="#333333"
+          autoCapitalize="none"
+          autoCorrect={false}
+          className="flex-1 text-white text-[14px] py-[11px] ml-2"
+        />
+        {search.length > 0 && (
+          <Pressable onPress={() => setSearch("")} hitSlop={8}>
+            <Feather name="x" size={14} color="#444444" />
+          </Pressable>
+        )}
       </View>
 
       {loading ? (
@@ -1128,7 +1156,7 @@ export function ConquistasTab({ groupId }: { groupId: string }) {
         </View>
       ) : (
         <FlatList
-          data={achievements}
+          data={achievements.filter(a => a.title.toLowerCase().includes(search.toLowerCase()))}
           keyExtractor={(item) => item.id}
           renderItem={({ item, index }) => (
             <AchievementCard

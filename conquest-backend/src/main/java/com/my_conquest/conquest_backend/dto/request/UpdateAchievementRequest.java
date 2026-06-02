@@ -1,4 +1,4 @@
-package com.my_conquest.conquest_backend.dto;
+package com.my_conquest.conquest_backend.dto.request;
 
 import com.my_conquest.conquest_backend.enums.AchievementCategory;
 import jakarta.validation.constraints.Max;

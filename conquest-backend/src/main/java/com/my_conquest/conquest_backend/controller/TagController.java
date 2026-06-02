@@ -1,9 +1,9 @@
 package com.my_conquest.conquest_backend.controller;
 
-import com.my_conquest.conquest_backend.dto.CreateTagRequest;
-import com.my_conquest.conquest_backend.dto.IdResponse;
-import com.my_conquest.conquest_backend.dto.TagResponse;
-import com.my_conquest.conquest_backend.dto.UpdateTagRequest;
+import com.my_conquest.conquest_backend.dto.request.CreateTagRequest;
+import com.my_conquest.conquest_backend.dto.response.IdResponse;
+import com.my_conquest.conquest_backend.dto.response.TagResponse;
+import com.my_conquest.conquest_backend.dto.request.UpdateTagRequest;
 import com.my_conquest.conquest_backend.notation.CurrentUserNotation;
 import com.my_conquest.conquest_backend.service.TagService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -14,7 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController

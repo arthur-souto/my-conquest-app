@@ -1,6 +1,4 @@
-package com.my_conquest.conquest_backend.dto;
-
-import com.my_conquest.conquest_backend.entity.Group;
+package com.my_conquest.conquest_backend.dto.response;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;

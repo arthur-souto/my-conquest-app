@@ -1,6 +1,10 @@
 package com.my_conquest.conquest_backend.controller;
 
-import com.my_conquest.conquest_backend.dto.*;
+import com.my_conquest.conquest_backend.dto.request.CreateAchievementRequest;
+import com.my_conquest.conquest_backend.dto.request.CreateEvidenceRequest;
+import com.my_conquest.conquest_backend.dto.request.UpdateAchievementRequest;
+import com.my_conquest.conquest_backend.dto.response.AchievementResponse;
+import com.my_conquest.conquest_backend.dto.response.IdResponse;
 import com.my_conquest.conquest_backend.notation.CurrentUserNotation;
 import com.my_conquest.conquest_backend.service.AchievementService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -21,7 +25,7 @@ public class AchievementController {
     private final AchievementService achievementService;
 
     @PostMapping("/{groupId}")
-    public IdResponse createAchievement(@Parameter(hidden = true) @CurrentUserNotation UUID userId,  @PathVariable UUID groupId, @RequestBody @Valid CreateAchievementRequest req) {
+    public IdResponse createAchievement(@Parameter(hidden = true) @CurrentUserNotation UUID userId, @PathVariable UUID groupId, @RequestBody @Valid CreateAchievementRequest req) {
         return achievementService.createAchievement(userId, groupId, req);
     }
 

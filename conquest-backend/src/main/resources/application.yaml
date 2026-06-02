@@ -9,14 +9,21 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+    locations: classpath:db/migration
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: ${JPA_SHOW_SQL:false}
+    show-sql: ${JPA_SHOW_SQL:true}
     properties:
       hibernate:
         jdbc:
           time_zone: UTC
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_URI:http://localhost:8080/realms/conquest_realm}
+
 
 app:
   frontend:
@@ -24,15 +31,13 @@ app:
   # Set to true in development/staging, false in production
   include-error-details: ${INCLUDE_ERROR_DETAILS:false}
 
-jwt:
-  public:
-    key: ${JWT_PUBLIC_KEY:file:certs/public.pem}
-  private:
-    key: ${JWT_PRIVATE_KEY:file:certs/private_pkcs8.pem}
-  issuer: conquest
+
 
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
   api-docs:
     path: /v3/api-docs
+
+server:
+  port: 8081

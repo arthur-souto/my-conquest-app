@@ -12,6 +12,17 @@ services:
     volumes:
       - conquest-db-data:/var/lib/postgresql/data
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.6.2
+    command: start-dev
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${USERNAME_KEYCLOAK:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${PASSWORD_KEYCLOAK:-admin}
+    ports:
+      - "8080:8080"
+
+
+
   # api:
   #   build:
   #     context: .

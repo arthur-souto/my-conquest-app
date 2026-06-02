@@ -1,9 +1,9 @@
 package com.my_conquest.conquest_backend.controller;
 
-import com.my_conquest.conquest_backend.dto.CreateGroupRequest;
-import com.my_conquest.conquest_backend.dto.GroupResponse;
-import com.my_conquest.conquest_backend.dto.IdResponse;
-import com.my_conquest.conquest_backend.dto.UpdateGroupRequest;
+import com.my_conquest.conquest_backend.dto.request.CreateGroupRequest;
+import com.my_conquest.conquest_backend.dto.response.GroupResponse;
+import com.my_conquest.conquest_backend.dto.response.IdResponse;
+import com.my_conquest.conquest_backend.dto.request.UpdateGroupRequest;
 import com.my_conquest.conquest_backend.notation.CurrentUserNotation;
 import com.my_conquest.conquest_backend.service.GroupService;
 import io.swagger.v3.oas.annotations.Parameter;

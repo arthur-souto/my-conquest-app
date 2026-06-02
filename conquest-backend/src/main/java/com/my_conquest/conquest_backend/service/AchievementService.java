@@ -1,6 +1,9 @@
 package com.my_conquest.conquest_backend.service;
 
-import com.my_conquest.conquest_backend.dto.*;
+import com.my_conquest.conquest_backend.dto.request.CreateAchievementRequest;
+import com.my_conquest.conquest_backend.dto.request.CreateEvidenceRequest;
+import com.my_conquest.conquest_backend.dto.request.UpdateAchievementRequest;
+import com.my_conquest.conquest_backend.dto.response.*;
 import com.my_conquest.conquest_backend.exception.ResourceNotFoundException;
 import com.my_conquest.conquest_backend.repository.AchievementRepository;
 import com.my_conquest.conquest_backend.repository.EvidenceRepository;
@@ -30,7 +33,7 @@ public class AchievementService {
 
     @Transactional
     public IdResponse createAchievement(UUID userId, UUID groupId, CreateAchievementRequest req) {
-        final var group = groupRepository.findByIdAndUserId(groupId, userId).orElseThrow(() -> new ResourceNotFoundException("Group not found"));
+        final var group = groupRepository.findByIdAndUserKeyCloakId(groupId, userId).orElseThrow(() -> new ResourceNotFoundException("Group not found"));
         final var achievement = CreateAchievementRequest.toEntity(req);
         achievement.setGroup(group);
 
@@ -39,7 +42,7 @@ public class AchievementService {
 
     @Transactional(readOnly = true)
     public Page<AchievementResponse> getAllAchievements(UUID userId, UUID groupId, Pageable pageable) {
-        final var group = groupRepository.findByIdAndUserId(groupId, userId).orElseThrow(() -> new ResourceNotFoundException("Group not found")).getId();
+        final var group = groupRepository.findByIdAndUserKeyCloakId(groupId, userId).orElseThrow(() -> new ResourceNotFoundException("Group not found")).getId();
 
         Page<AchievementSummary> achievements = achievementRepository.findByGroupId(group, pageable);
         List<UUID> achievementsIds = achievements.map(AchievementSummary::getId).stream().toList();
@@ -67,7 +70,7 @@ public class AchievementService {
 
     @Transactional
     public IdResponse updateAchievement(UUID userId, UUID groupId, UUID achievementId, UpdateAchievementRequest req) {
-        if(!groupRepository.existsByIdAndUserId(groupId, userId)) {
+        if(!groupRepository.existsByIdAndUserKeyCloakId(groupId, userId)) {
             throw new ResourceNotFoundException("Group not found.");
         }
 
@@ -84,7 +87,7 @@ public class AchievementService {
 
     @Transactional
     public void deleteAchievement(UUID userId, UUID groupId, UUID achievementId) {
-        if(!groupRepository.existsByIdAndUserId(groupId, userId)) {
+        if(!groupRepository.existsByIdAndUserKeyCloakId(groupId, userId)) {
             throw new ResourceNotFoundException("Group not found.");
         }
 
@@ -97,12 +100,12 @@ public class AchievementService {
 
     @Transactional
     public void addTag(UUID userId, UUID groupId, UUID achievementId, UUID tagId) {
-        if(!groupRepository.existsByIdAndUserId(groupId, userId)) {
+        if(!groupRepository.existsByIdAndUserKeyCloakId(groupId, userId)) {
             throw new ResourceNotFoundException("Group not found.");
         }
 
         final var achievement = achievementRepository.findByIdAndGroupId(achievementId, groupId).orElseThrow(() -> new ResourceNotFoundException("Achievement not found."));
-        final var tag = tagRepository.findByIdAndUserId(tagId, userId).orElseThrow(() -> new ResourceNotFoundException("Tag not found."));
+        final var tag = tagRepository.findByIdAndUserKeyCloakId(tagId, userId).orElseThrow(() -> new ResourceNotFoundException("Tag not found."));
 
         achievement.addTag(tag);
 
@@ -111,12 +114,12 @@ public class AchievementService {
 
     @Transactional
     public void removeTag(UUID userId, UUID groupId, UUID achievementId, UUID tagId) {
-        if(!groupRepository.existsByIdAndUserId(groupId, userId)) {
+        if(!groupRepository.existsByIdAndUserKeyCloakId(groupId, userId)) {
             throw new ResourceNotFoundException("Group not found.");
         }
 
         final var achievement = achievementRepository.findByIdAndGroupId(achievementId, groupId).orElseThrow(() -> new ResourceNotFoundException("Achievement not found."));
-        final var tag = tagRepository.findByIdAndUserId(tagId, userId).orElseThrow(() -> new ResourceNotFoundException("Tag not found."));
+        final var tag = tagRepository.findByIdAndUserKeyCloakId(tagId, userId).orElseThrow(() -> new ResourceNotFoundException("Tag not found."));
 
         achievement.removeTag(tag);
 
@@ -125,7 +128,7 @@ public class AchievementService {
 
     @Transactional
     public IdResponse addEvidence(UUID userId, UUID groupId, UUID achievementId, CreateEvidenceRequest req) {
-        if(!groupRepository.existsByIdAndUserId(groupId, userId)) {
+        if(!groupRepository.existsByIdAndUserKeyCloakId(groupId, userId)) {
             throw new ResourceNotFoundException("Group not found.");
         }
 
@@ -140,7 +143,7 @@ public class AchievementService {
 
     @Transactional
     public void removeEvidence(UUID userId, UUID groupId, UUID achievementId, UUID evidenceId) {
-        if(!groupRepository.existsByIdAndUserId(groupId, userId)) {
+        if(!groupRepository.existsByIdAndUserKeyCloakId(groupId, userId)) {
             throw new ResourceNotFoundException("Group not found.");
         }
 
