@@ -21,8 +21,9 @@ public interface AchievementRepository extends JpaRepository<Achievement, UUID> 
     SELECT a.group.id as groupId, a.id as id, a.title as title, a.description as description,
     a.category as category, a.difficultyLevel as difficultyLevel,
     a.achievedAt as achievedAt, a.createdAt as createdAt
-    FROM Achievement a WHERE a.group.id =:groupId 
+    FROM Achievement a WHERE a.group.id =:groupId
+    AND (:target IS NULL OR LOWER(a.title) LIKE %:target%)
     """)
-    Page<AchievementSummary> findByGroupId(@Param("groupId") UUID groupId, Pageable pageable);
+    Page<AchievementSummary> findByGroupIdAndTarget(@Param("groupId") UUID groupId, @Param("target") String target, Pageable pageable);
 
 }

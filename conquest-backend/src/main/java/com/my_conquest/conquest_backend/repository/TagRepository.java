@@ -14,7 +14,12 @@ import java.util.UUID;
 
 public interface TagRepository extends JpaRepository<Tag, UUID> {
 
-    Page<Tag> findAllByUserKeyCloakId(UUID userId, Pageable pageable);
+    @Query("""
+    SELECT t FROM Tag t
+    WHERE t.user.keyCloakId = :userId
+    AND (:target IS NULL OR LOWER(t.name) LIKE %:target%)
+    """)
+    Page<Tag> findAllByUserKeyCloakIdAndName(@Param("userId") UUID userId, @Param("target") String target, Pageable pageable);
 
     Optional<Tag> findByUserKeyCloakIdAndName(UUID userId, String name);
 

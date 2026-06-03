@@ -33,8 +33,8 @@ public class TagController {
     }
 
     @GetMapping
-    public Page<TagResponse> findAll(@Parameter(hidden = true) @CurrentUserNotation UUID userId, Pageable pageable) {
-        return tagService.findAll(userId, pageable);
+    public Page<TagResponse> findAll(@Parameter(hidden = true) @CurrentUserNotation UUID userId, @RequestParam(required = false) String target, Pageable pageable) {
+        return tagService.findAll(userId, target, pageable);
     }
 
     @PatchMapping("/{id}")

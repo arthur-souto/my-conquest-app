@@ -30,8 +30,8 @@ public class AchievementController {
     }
 
     @GetMapping("/{groupId}")
-    public Page<AchievementResponse> findAllAchievements(@Parameter(hidden = true) @CurrentUserNotation UUID userId, @PathVariable UUID groupId, Pageable pageable) {
-        return achievementService.getAllAchievements(userId, groupId, pageable);
+    public Page<AchievementResponse> findAllAchievements(@Parameter(hidden = true) @CurrentUserNotation UUID userId, @PathVariable UUID groupId, @RequestParam(required = false) String target, Pageable pageable) {
+        return achievementService.getAllAchievements(userId, groupId, target, pageable);
     }
 
     @PatchMapping("/{groupId}/{achievementId}")

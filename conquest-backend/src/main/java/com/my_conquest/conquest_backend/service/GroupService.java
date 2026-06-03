@@ -38,8 +38,8 @@ public class GroupService {
     }
 
     @Transactional(readOnly = true)
-    public Page<GroupResponse> findMyGroups(UUID userId, Pageable pageable) {
-        return groupRepository.findAllByKeyCloakId(userId, pageable).map(GroupResponse::toResponse);
+    public Page<GroupResponse> findMyGroups(UUID userId, String target, Pageable pageable) {
+        return groupRepository.findAllByKeyCloakIdAndTarget(userId, target != null ? target.toLowerCase() : null, pageable).map(GroupResponse::toResponse);
     }
 
     @Transactional

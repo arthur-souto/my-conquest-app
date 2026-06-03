@@ -31,9 +31,9 @@ public class GroupController {
     }
 
     @GetMapping
-    public Page<GroupResponse> findAll(@Parameter(hidden = true) @CurrentUserNotation UUID userId, Pageable pageable
+    public Page<GroupResponse> findAll(@Parameter(hidden = true) @CurrentUserNotation UUID userId, @RequestParam(required = false) String target, Pageable pageable
     ) {
-        return groupService.findMyGroups(userId, pageable);
+        return groupService.findMyGroups(userId, target, pageable);
     }
 
     @PatchMapping("/{id}")

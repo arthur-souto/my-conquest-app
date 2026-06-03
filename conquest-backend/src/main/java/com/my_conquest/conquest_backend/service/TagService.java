@@ -39,8 +39,8 @@ public class TagService {
     }
 
     @Transactional(readOnly = true)
-    public Page<TagResponse> findAll(UUID userId, Pageable pageable) {
-        return tagRepository.findAllByUserKeyCloakId(userId, pageable)
+    public Page<TagResponse> findAll(UUID userId, String target, Pageable pageable) {
+        return tagRepository.findAllByUserKeyCloakIdAndName(userId, target != null ? target.toLowerCase() : null, pageable)
                 .map(TagResponse::from);
     }
 

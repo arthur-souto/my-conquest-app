@@ -41,10 +41,10 @@ public class AchievementService {
     }
 
     @Transactional(readOnly = true)
-    public Page<AchievementResponse> getAllAchievements(UUID userId, UUID groupId, Pageable pageable) {
+    public Page<AchievementResponse> getAllAchievements(UUID userId, UUID groupId, String target, Pageable pageable) {
         final var group = groupRepository.findByIdAndUserKeyCloakId(groupId, userId).orElseThrow(() -> new ResourceNotFoundException("Group not found")).getId();
 
-        Page<AchievementSummary> achievements = achievementRepository.findByGroupId(group, pageable);
+        Page<AchievementSummary> achievements = achievementRepository.findByGroupIdAndTarget(group, target != null ? target.toLowerCase() : null, pageable);
         List<UUID> achievementsIds = achievements.map(AchievementSummary::getId).stream().toList();
 
         Map<UUID, List<TagSummary>> tagsMap = tagRepository.findAllByAchievements(achievementsIds)

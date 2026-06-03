@@ -15,6 +15,8 @@ public interface GroupRepository extends JpaRepository<Group, UUID> {
 
     boolean existsByIdAndUserKeyCloakId(UUID id, UUID userId);
 
+    Optional<Group> findByIdAndUserKeyCloakId(UUID id, UUID userId);
+
     @Query("""
     SELECT 
     g.id as id,
@@ -25,11 +27,10 @@ public interface GroupRepository extends JpaRepository<Group, UUID> {
     FROM Group g
     LEFT JOIN g.achievements a 
     WHERE g.user.keyCloakId =:keyCloakId
+    AND (:target IS NULL OR LOWER(g.name) LIKE %:target%)      
     GROUP BY g.id, g.name, g.description, g.createdAt 
     """)
-    Page<GroupSummary> findAllByKeyCloakId(@Param("keyCloakId") UUID keyCloakId, Pageable pageable);
-
-    Optional<Group> findByIdAndUserKeyCloakId(UUID id, UUID userId);
+    Page<GroupSummary> findAllByKeyCloakIdAndTarget(@Param("keyCloakId") UUID keyCloakId, @Param("target") String target, Pageable pageable);
 
     boolean existsByNameAndUserKeyCloakId(String name, UUID userId);
 }
