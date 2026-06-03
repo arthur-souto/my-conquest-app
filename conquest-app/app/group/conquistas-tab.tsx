@@ -852,6 +852,15 @@ export function ConquistasTab({ groupId }: { groupId: string }) {
   const [tagPickerVisible, setTagPickerVisible] = useState(false);
   const [tagPickerTargetId, setTagPickerTargetId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [searching, setSearching] = useState(false);
+  const fetchIdRef = useRef(0);
+  const isInitialLoad = useRef(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 350);
+    return () => clearTimeout(t);
+  }, [search]);
 
 
   const showError = (msg: string) =>
@@ -864,28 +873,43 @@ export function ConquistasTab({ groupId }: { groupId: string }) {
       ),
     });
 
-  const fetchAchievements = useCallback(async (pageNum: number, append: boolean) => {
+  const fetchAchievements = useCallback(async (pageNum: number, append: boolean, target: string) => {
+    const id = ++fetchIdRef.current;
     try {
-      const result = await getAchievements(groupId, { page: pageNum, size: PAGE_SIZE });
+      const result = await getAchievements(groupId, { page: pageNum, size: PAGE_SIZE, target: target || undefined });
+      if (id !== fetchIdRef.current) return;
       setAchievements((prev) => (append ? [...prev, ...result.content] : result.content));
       setHasMore(pageNum < result.totalPages - 1);
       setPage(pageNum);
     } catch {
+      if (id !== fetchIdRef.current) return;
       showError("Falha ao carregar conquistas");
     } finally {
+      if (id !== fetchIdRef.current) return;
       setLoading(false);
       setLoadingMore(false);
+      setSearching(false);
     }
   }, [groupId]);
 
   useEffect(() => {
-    fetchAchievements(0, false);
-  }, []);
+    const isInitial = isInitialLoad.current;
+    isInitialLoad.current = false;
+    if (isInitial) {
+      setLoading(true);
+    } else {
+      setSearching(true);
+    }
+    setAchievements([]);
+    setPage(0);
+    setHasMore(true);
+    fetchAchievements(0, false, debouncedSearch);
+  }, [debouncedSearch, fetchAchievements]);
 
   const loadMore = () => {
     if (loadingMore || !hasMore) return;
     setLoadingMore(true);
-    fetchAchievements(page + 1, true);
+    fetchAchievements(page + 1, true, debouncedSearch);
   };
 
   // ── CRUD ──
@@ -1116,7 +1140,7 @@ export function ConquistasTab({ groupId }: { groupId: string }) {
           {loading ? "" : `${achievements.length} conquista${achievements.length !== 1 ? "s" : ""}`}
         </Text>
         <Pressable
-          onPress={() => { setLoading(true); fetchAchievements(0, false); }}
+          onPress={() => { setLoading(true); fetchAchievements(0, false, debouncedSearch); }}
           disabled={loading}
           hitSlop={8}
           className="p-1.5 mr-2 active:opacity-50"
@@ -1133,7 +1157,10 @@ export function ConquistasTab({ groupId }: { groupId: string }) {
 
       {/* Search */}
       <View className="flex-row items-center bg-[#111111] border border-[#1f1f1f] rounded-lg mx-5 my-3 px-4">
-        <Feather name="search" size={14} color="#444444" />
+        {searching
+          ? <ActivityIndicator size="small" color="#444444" />
+          : <Feather name="search" size={14} color="#444444" />
+        }
         <TextInput
           value={search}
           onChangeText={setSearch}
@@ -1150,13 +1177,13 @@ export function ConquistasTab({ groupId }: { groupId: string }) {
         )}
       </View>
 
-      {loading ? (
+      {loading || searching ? (
         <View className="px-5 pt-3">
           {Array.from({ length: 4 }).map((_, i) => <AchievementSkeleton key={i} />)}
         </View>
       ) : (
         <FlatList
-          data={achievements.filter(a => a.title.toLowerCase().includes(search.toLowerCase()))}
+          data={achievements}
           keyExtractor={(item) => item.id}
           renderItem={({ item, index }) => (
             <AchievementCard

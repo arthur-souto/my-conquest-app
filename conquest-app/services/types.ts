@@ -9,6 +9,7 @@ export interface Pagination<T> {
 export interface PaginationRequest {
     page: number;
     size: number;
+    target?: string;
 }
 
 export interface IdResponse {

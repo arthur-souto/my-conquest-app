@@ -8,7 +8,6 @@ import com.my_conquest.conquest_backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClient;
 
 import java.util.UUID;
 
@@ -17,7 +16,6 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final RestClient restClient;
 
     @Transactional
     public void getOrCreateUser(UUID keycloakId, User.UserBuilder builder) {

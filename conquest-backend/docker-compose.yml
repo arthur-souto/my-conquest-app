@@ -18,8 +18,16 @@ services:
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${USERNAME_KEYCLOAK:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${PASSWORD_KEYCLOAK:-admin}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://db:5432/conquest_db
+      KC_DB_USERNAME: ${DB_USERNAME:-conquest_dev}
+      KC_DB_PASSWORD: ${DB_PASSWORD:-1234}
     ports:
       - "8080:8080"
+    volumes:
+      - ./keycloak-theme/conquest:/opt/keycloak/themes/conquest
+    depends_on:
+      - db
 
 
 

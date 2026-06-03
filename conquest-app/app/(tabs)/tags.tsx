@@ -261,6 +261,15 @@ export default function TagsScreen() {
   const [editingTag, setEditingTag] = useState<Tag | null>(null);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [searching, setSearching] = useState(false);
+  const fetchIdRef = useRef(0);
+  const isInitialLoad = useRef(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 350);
+    return () => clearTimeout(t);
+  }, [search]);
 
   const showError = (msg: string) => {
     toast.show({
@@ -273,28 +282,43 @@ export default function TagsScreen() {
     });
   };
 
-  const fetchTags = useCallback(async (pageNum: number, append: boolean) => {
+  const fetchTags = useCallback(async (pageNum: number, append: boolean, target: string) => {
+    const id = ++fetchIdRef.current;
     try {
-      const result = await getMyTags({ page: pageNum, size: PAGE_SIZE });
+      const result = await getMyTags({ page: pageNum, size: PAGE_SIZE, target: target || undefined });
+      if (id !== fetchIdRef.current) return;
       setTags(prev => append ? [...prev, ...result.content] : result.content);
       setHasMore(pageNum < result.totalPages - 1);
       setPage(pageNum);
     } catch {
+      if (id !== fetchIdRef.current) return;
       showError("Falha ao carregar tags");
     } finally {
+      if (id !== fetchIdRef.current) return;
       setLoading(false);
       setLoadingMore(false);
+      setSearching(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchTags(0, false);
-  }, []);
+    const isInitial = isInitialLoad.current;
+    isInitialLoad.current = false;
+    if (isInitial) {
+      setLoading(true);
+    } else {
+      setSearching(true);
+    }
+    setTags([]);
+    setPage(0);
+    setHasMore(true);
+    fetchTags(0, false, debouncedSearch);
+  }, [debouncedSearch, fetchTags]);
 
   const loadMore = () => {
     if (loadingMore || !hasMore) return;
     setLoadingMore(true);
-    fetchTags(page + 1, true);
+    fetchTags(page + 1, true, debouncedSearch);
   };
 
   const handleSave = async (name: string, color: string) => {
@@ -359,7 +383,7 @@ export default function TagsScreen() {
       <View className="flex-row items-center px-5 pt-4 pb-3">
         <Text className="flex-1 text-white text-[22px] font-bold">Tags</Text>
         <Pressable
-          onPress={() => { setLoading(true); fetchTags(0, false); }}
+          onPress={() => { setLoading(true); fetchTags(0, false, debouncedSearch); }}
           disabled={loading}
           hitSlop={8}
           className="p-2 mr-2 active:opacity-50"
@@ -376,7 +400,10 @@ export default function TagsScreen() {
 
       {/* Search */}
       <View className="flex-row items-center bg-[#111111] border border-[#1f1f1f] rounded-lg mx-5 mb-3 px-4">
-        <Ionicons name="search" size={14} color="#444444" />
+        {searching
+          ? <ActivityIndicator size="small" color="#444444" />
+          : <Ionicons name="search" size={14} color="#444444" />
+        }
         <TextInput
           value={search}
           onChangeText={setSearch}
@@ -394,13 +421,13 @@ export default function TagsScreen() {
       </View>
 
       {/* List */}
-      {loading ? (
+      {loading || searching ? (
         <View className="px-5 pt-1">
           {Array.from({ length: 7 }).map((_, i) => <TagSkeleton key={i} />)}
         </View>
       ) : (
         <FlatList
-          data={tags.filter(t => t.name.toLowerCase().includes(search.toLowerCase()))}
+          data={tags}
           keyExtractor={item => item.id}
           renderItem={({ item, index }) => (
             <TagItem

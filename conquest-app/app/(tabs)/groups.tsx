@@ -269,6 +269,15 @@ export default function GroupsScreen() {
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [searching, setSearching] = useState(false);
+  const fetchIdRef = useRef(0);
+  const isInitialLoad = useRef(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 350);
+    return () => clearTimeout(t);
+  }, [search]);
 
   const showError = (msg: string) => {
     toast.show({
@@ -281,28 +290,43 @@ export default function GroupsScreen() {
     });
   };
 
-  const fetchGroups = useCallback(async (pageNum: number, append: boolean) => {
+  const fetchGroups = useCallback(async (pageNum: number, append: boolean, target: string) => {
+    const id = ++fetchIdRef.current;
     try {
-      const result = await getGroups({ page: pageNum, size: PAGE_SIZE });
+      const result = await getGroups({ page: pageNum, size: PAGE_SIZE, target: target || undefined });
+      if (id !== fetchIdRef.current) return;
       setGroups(prev => append ? [...prev, ...result.content] : result.content);
       setHasMore(pageNum < result.totalPages - 1);
       setPage(pageNum);
     } catch {
+      if (id !== fetchIdRef.current) return;
       showError("Falha ao carregar grupos");
     } finally {
+      if (id !== fetchIdRef.current) return;
       setLoading(false);
       setLoadingMore(false);
+      setSearching(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchGroups(0, false);
-  }, []);
+    const isInitial = isInitialLoad.current;
+    isInitialLoad.current = false;
+    if (isInitial) {
+      setLoading(true);
+    } else {
+      setSearching(true);
+    }
+    setGroups([]);
+    setPage(0);
+    setHasMore(true);
+    fetchGroups(0, false, debouncedSearch);
+  }, [debouncedSearch, fetchGroups]);
 
   const loadMore = () => {
     if (loadingMore || !hasMore) return;
     setLoadingMore(true);
-    fetchGroups(page + 1, true);
+    fetchGroups(page + 1, true, debouncedSearch);
   };
 
   const handleSave = async (name: string, description: string) => {
@@ -374,7 +398,7 @@ export default function GroupsScreen() {
       <View className="flex-row items-center px-5 pt-4 pb-3">
         <Text className="flex-1 text-white text-[22px] font-bold">Grupos</Text>
         <Pressable
-          onPress={() => { setLoading(true); fetchGroups(0, false); }}
+          onPress={() => { setLoading(true); fetchGroups(0, false, debouncedSearch); }}
           disabled={loading}
           hitSlop={8}
           className="p-2 mr-2 active:opacity-50"
@@ -391,7 +415,10 @@ export default function GroupsScreen() {
 
       {/* Search */}
       <View className="flex-row items-center bg-[#111111] border border-[#1f1f1f] rounded-lg mx-5 mb-3 px-4">
-        <Feather name="search" size={14} color="#444444" />
+        {searching
+          ? <ActivityIndicator size="small" color="#444444" />
+          : <Feather name="search" size={14} color="#444444" />
+        }
         <TextInput
           value={search}
           onChangeText={setSearch}
@@ -408,13 +435,13 @@ export default function GroupsScreen() {
         )}
       </View>
 
-      {loading ? (
+      {loading || searching ? (
         <View className="px-5 pt-1">
           {Array.from({ length: 6 }).map((_, i) => <GroupSkeleton key={i} />)}
         </View>
       ) : (
         <FlatList
-          data={groups.filter(g => g.name.toLowerCase().includes(search.toLowerCase()))}
+          data={groups}
           keyExtractor={item => item.id}
           renderItem={({ item, index }) => (
             <GroupItem
