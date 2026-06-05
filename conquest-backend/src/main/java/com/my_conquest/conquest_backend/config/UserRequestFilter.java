@@ -31,11 +31,13 @@ public class UserRequestFilter extends OncePerRequestFilter {
             var keyCloakId = UUID.fromString(jwt.getSubject());
             var name = jwt.getClaim("name").toString();
             var email = jwt.getClaim("email").toString();
+            var username = jwt.getClaim("preferred_username").toString();
 
             userService.getOrCreateUser(keyCloakId, User
                     .builder()
                     .name(name.trim())
                     .email(email.trim())
+                    .username(username.trim())
                     .keyCloakId(keyCloakId)
             );
         }

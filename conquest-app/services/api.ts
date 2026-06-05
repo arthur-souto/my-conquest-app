@@ -8,6 +8,15 @@ export const api = axios.create({
 
 
 
+api.interceptors.request.use(async (config) => {
+  const raw = await AsyncStorageImpl.getItem(AsyncStorageImpl.TOKEN_KEY);
+  if (raw) {
+    const { accessToken } = JSON.parse(raw);
+    config.headers.Authorization = `Bearer ${accessToken}`;
+  }
+  return config;
+});
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {

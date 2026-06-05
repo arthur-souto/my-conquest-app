@@ -4,30 +4,50 @@ import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ConquistasTab } from "./conquistas-tab";
+import { formatDateBR } from "@/utils/date";
 
 const TABS = ["Visão Geral", "Conquistas"] as const;
 type Tab = (typeof TABS)[number];
 
-function OverviewTab({ id, description }: { id: string; description?: string }) {
+function OverviewTab({ id, description, createdAt, name, achievementsCount }: { id: string; description?: string; createdAt: string; name: string; achievementsCount: string }) {
   return (
-    <ScrollView contentContainerStyle={{ padding: 20, gap: 12 }}>
-      <View className="bg-[#111111] border border-[#1f1f1f] rounded-md px-5 py-4">
+    <ScrollView contentContainerStyle={{ padding: 20, gap: 16 }}>
+      {/* Nome + Descrição unificados */}
+      <View className="bg-[#111111] border border-[#1f1f1f] rounded-xl px-5 py-5">
+        <Text className="text-white text-[18px] font-semibold mb-1">{name}</Text>
+        {!!description ? (
+          <Text className="text-[#666666] text-[14px] leading-5">{description}</Text>
+        ) : (
+          <Text className="text-[#444444] text-[13px] italic">Sem descrição</Text>
+        )}
+      </View>
+
+      {/* Informações do grupo */}
+      <View className="bg-[#111111] border border-[#1f1f1f] rounded-xl overflow-hidden">
+        <View className="flex-row items-center px-5 py-4">
+          <Feather name="calendar" size={15} color="#666666" />
+          <Text className="text-[#666666] text-[13px] ml-3 flex-1">Criado em</Text>
+          <Text className="text-white text-[13px]">{formatDateBR(createdAt)}</Text>
+        </View>
+        <View className="h-[1px] bg-[#1f1f1f] mx-5" />
+        <View className="flex-row items-center px-5 py-4">
+          <Feather name="award" size={15} color="#666666" />
+          <Text className="text-[#666666] text-[13px] ml-3 flex-1">Conquistas</Text>
+          <Text className="text-white text-[13px]">{achievementsCount}</Text>
+        </View>
+      </View>
+
+      {/* ID do grupo */}
+      <View className="bg-[#111111] border border-[#1f1f1f] rounded-xl px-5 py-4">
         <Text className="text-[#666666] text-[11px] tracking-widest mb-2">ID DO GRUPO</Text>
         <Text
-          className="text-white text-[13px]"
+          className="text-[#888888] text-[12px]"
           style={{ fontFamily: "monospace" }}
           selectable
         >
           {id}
         </Text>
       </View>
-
-      {!!description && (
-        <View className="bg-[#111111] border border-[#1f1f1f] rounded-md px-5 py-4">
-          <Text className="text-[#666666] text-[11px] tracking-widest mb-2">DESCRIÇÃO</Text>
-          <Text className="text-white text-[14px] leading-5">{description}</Text>
-        </View>
-      )}
     </ScrollView>
   );
 }
@@ -38,10 +58,12 @@ export default function GroupScreen() {
   const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab] = useState<Tab>("Visão Geral");
 
-  const { id, name, description } = useLocalSearchParams<{
+  const { id, name, description, createdAt, achievementsCount } = useLocalSearchParams<{
     id: string;
     name: string;
     description?: string;
+    createdAt: string;  
+    achievementsCount: string;
   }>();
 
   return (
@@ -83,7 +105,7 @@ export default function GroupScreen() {
       {/* Content */}
       <View className="flex-1">
         {activeTab === "Visão Geral" && (
-          <OverviewTab id={id} description={description} />
+          <OverviewTab id={id} description={description} achievementsCount={achievementsCount} createdAt={createdAt} name={name} />
         )}
         {activeTab === "Conquistas" && <ConquistasTab groupId={id} />}
       </View>

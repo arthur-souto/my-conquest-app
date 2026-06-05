@@ -1,3 +1,4 @@
+import { UserBar } from "@/components/user-bar";
 import {
   Toast,
   ToastDescription,
@@ -379,6 +380,7 @@ export default function TagsScreen() {
 
   return (
     <View className="flex-1 bg-[#0a0a0a]" style={{ paddingTop: insets.top }}>
+      <UserBar />
       {/* Header */}
       <View className="flex-row items-center px-5 pt-4 pb-3">
         <Text className="flex-1 text-white text-[22px] font-bold">Tags</Text>

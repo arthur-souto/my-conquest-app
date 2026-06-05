@@ -1,3 +1,4 @@
+import { UserBar } from "@/components/user-bar";
 import {
   Toast,
   ToastDescription,
@@ -394,6 +395,7 @@ export default function GroupsScreen() {
 
   return (
     <View className="flex-1 bg-[#0a0a0a]" style={{ paddingTop: insets.top }}>
+      <UserBar />
       {/* Header */}
       <View className="flex-row items-center px-5 pt-4 pb-3">
         <Text className="flex-1 text-white text-[22px] font-bold">Grupos</Text>
@@ -447,7 +449,7 @@ export default function GroupsScreen() {
             <GroupItem
               group={item}
               index={index}
-              onPress={() => router.push({ pathname: "/group/[id]", params: { id: item.id, name: item.name, description: item.description ?? "" } })}
+              onPress={() => router.push({ pathname: "/group/[id]", params: { id: item.id, name: item.name, description: item.description ?? "", createdAt: item.createdAt, achievementsCount: item.achievementsCount ?? 0} })}
               onEdit={() => { setEditingGroup(item); setSheetVisible(true); }}
               onDelete={() => handleDelete(item)}
             />

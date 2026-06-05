@@ -1,3 +1,4 @@
+import { UserBar } from "@/components/user-bar";
 import { Feather } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { ScrollView, Text, View } from "react-native";
@@ -19,10 +20,12 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
 
   return (
+    <View className="flex-1 bg-[#0a0a0a]" style={{ paddingTop: insets.top }}>
+      <UserBar />
     <ScrollView
-      className="flex-1 bg-[#0a0a0a]"
+      className="flex-1"
       contentContainerStyle={{
-        paddingTop: insets.top + 24,
+        paddingTop: 24,
         paddingBottom: 40,
         paddingHorizontal: 20,
       }}
@@ -89,5 +92,6 @@ export default function HomeScreen() {
         </View>
       </View>
     </ScrollView>
+    </View>
   );
 }

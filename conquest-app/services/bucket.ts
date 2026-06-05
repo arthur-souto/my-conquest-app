@@ -1,4 +1,6 @@
+import { decode } from "base64-arraybuffer";
 import * as DocumentPicker from "expo-document-picker";
+import * as FileSystemLegacy from "expo-file-system/legacy";
 import * as ImagePicker from "expo-image-picker";
 import { supabase } from "@/lib/supabase";
 
@@ -65,10 +67,10 @@ export async function uploadImageFromDevice(bucket: string, pathPrefix: string) 
   const asset = result.assets[0];
   const fileName = asset.fileName ?? `${Date.now()}.jpg`;
   const mimeType = asset.mimeType ?? "image/jpeg";
-  const blob = await fetch(asset.uri).then((r) => r.blob());
+  const base64 = await FileSystemLegacy.readAsStringAsync(asset.uri, { encoding: "base64" });
   const path = `${pathPrefix}/${fileName}`;
 
-  await uploadFile(bucket, path, blob, mimeType);
+  await uploadFile(bucket, path, decode(base64), mimeType);
   return { path, mimeType };
 }
 
