@@ -99,6 +99,7 @@ function GroupItem({
       <Pressable
         onPress={onPress}
         className="bg-[#111111] border border-[#1f1f1f] rounded-md px-5 pt-5 pb-4 active:opacity-80"
+        style={{ borderLeftWidth: 3, borderLeftColor: "#f59e0b50" }}
       >
         {/* Nome + ações */}
         <View className="flex-row items-start mb-3">
@@ -107,10 +108,10 @@ function GroupItem({
           </Text>
           <View className="flex-row items-center gap-1">
             <Pressable onPress={onEdit} hitSlop={8} className="p-2 active:opacity-40">
-              <Feather name="edit-2" size={14} color="#666666" />
+              <Feather name="edit-2" size={14} color="#555555" />
             </Pressable>
             <Pressable onPress={onDelete} hitSlop={8} className="p-2 active:opacity-40">
-              <Feather name="trash-2" size={14} color="#666666" />
+              <Feather name="trash-2" size={14} color="#555555" />
             </Pressable>
           </View>
         </View>
@@ -126,14 +127,20 @@ function GroupItem({
 
         {/* Footer */}
         <View className="flex-row items-center border-t border-[#1f1f1f] pt-3">
-          <Feather name="layers" size={12} color="#333333" />
+          <Feather
+            name="award"
+            size={12}
+            color={group.achievementsCount ? "#f59e0b" : "#333333"}
+          />
           {!!group.achievementsCount ? (
-            <Text className="text-[#666666] text-[12px] ml-1.5">
+            <Text className="text-[12px] ml-1.5" style={{ color: "#f59e0b" }}>
               {group.achievementsCount} conquista{group.achievementsCount !== 1 ? "s" : ""}
             </Text>
           ) : (
             <Text className="text-[#333333] text-[12px] ml-1.5">Sem conquistas</Text>
           )}
+          <View style={{ flex: 1 }} />
+          <Feather name="chevron-right" size={14} color="#333333" />
         </View>
       </Pressable>
     </Animated.View>
@@ -241,12 +248,16 @@ function GroupSheet({
           <Pressable
             onPress={() => canSave && onSave(name.trim(), description.trim())}
             disabled={!canSave}
-            className={`rounded-md py-[15px] items-center active:opacity-75 ${canSave ? "bg-white" : "bg-[#1a1a1a]"}`}
+            className="rounded-md py-[15px] items-center active:opacity-75"
+            style={{ backgroundColor: canSave ? "#f59e0b" : "#1a1a1a" }}
           >
             {saving ? (
               <ActivityIndicator color="#0a0a0a" size="small" />
             ) : (
-              <Text className={`text-[15px] font-semibold ${canSave ? "text-[#0a0a0a]" : "text-[#666666]"}`}>
+              <Text
+                className="text-[15px] font-semibold"
+                style={{ color: canSave ? "#0a0a0a" : "#666666" }}
+              >
                 {isEdit ? "Salvar" : "Criar"}
               </Text>
             )}
@@ -409,7 +420,8 @@ export default function GroupsScreen() {
         </Pressable>
         <Pressable
           onPress={() => { setEditingGroup(null); setSheetVisible(true); }}
-          className="bg-white rounded-md px-[14px] py-2 active:opacity-75"
+          className="rounded-md px-[14px] py-2 active:opacity-75"
+          style={{ backgroundColor: "#f59e0b" }}
         >
           <Text className="text-[#0a0a0a] text-[13px] font-semibold">+ Novo</Text>
         </Pressable>
@@ -459,7 +471,20 @@ export default function GroupsScreen() {
           onEndReachedThreshold={0.3}
           ListEmptyComponent={
             <View className="items-center pt-20 gap-3">
-              <Feather name="layers" size={32} color="#333333" />
+              <View
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: 999,
+                  backgroundColor: "#f59e0b12",
+                  borderWidth: 1,
+                  borderColor: "#f59e0b30",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Feather name="layers" size={28} color="#f59e0b" />
+              </View>
               <Text className="text-[#666666] text-[13px]">Nenhum grupo ainda</Text>
             </View>
           }

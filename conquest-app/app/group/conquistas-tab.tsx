@@ -1,3 +1,4 @@
+import { ConquestWrappedCard } from "@/components/conquest-wrapped-card";
 import {
   Toast,
   ToastDescription,
@@ -19,12 +20,12 @@ import {
 import { deleteFiles, getPublicUrl, uploadFile } from "@/services/bucket";
 import AsyncStorageImpl from "@/services/storage";
 import { getMyTags, Tag } from "@/services/tag";
+import { Feather } from "@expo/vector-icons";
 import { decode } from "base64-arraybuffer";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystemLegacy from "expo-file-system/legacy";
-import * as WebBrowser from "expo-web-browser";
-import { Feather } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import * as WebBrowser from "expo-web-browser";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -232,6 +233,7 @@ function ImageViewerModal({
 function AchievementCard({
   achievement,
   index,
+  onView,
   onEdit,
   onDelete,
   onAddEvidence,
@@ -241,6 +243,7 @@ function AchievementCard({
 }: {
   achievement: AchievementResponse;
   index: number;
+  onView: () => void;
   onEdit: () => void;
   onDelete: () => void;
   onAddEvidence: () => void;
@@ -273,13 +276,16 @@ function AchievementCard({
       }}
       className="mb-3"
     >
-      <View className="bg-[#111111] border border-[#1f1f1f] rounded-md px-5 pt-5 pb-4">
+      <View className="bg-[#111111] border border-[#1f1f1f] rounded-md  border-l-[#f59e0b50] border-l-4 px-5 pt-5 pb-4">
         {/* Title row */}
         <View className="flex-row items-start mb-3">
           <Text className="flex-1 text-white text-[15px] font-semibold mr-3" numberOfLines={2}>
             {achievement.title}
           </Text>
           <View className="flex-row gap-1">
+            <Pressable onPress={onView} hitSlop={8} className="p-2 active:opacity-40">
+              <Feather name="eye" size={13} color="#666666" />
+            </Pressable>
             <Pressable onPress={onEdit} hitSlop={8} className="p-2 active:opacity-40">
               <Feather name="edit-2" size={13} color="#666666" />
             </Pressable>
@@ -832,7 +838,7 @@ function EvidenceSheet({
 
 // ─── Main Tab ─────────────────────────────────────────────────────────────────
 
-export function ConquistasTab({ groupId }: { groupId: string }) {
+export default function ConquistasTab({ groupId }: { groupId: string }) {
   const toast = useToast();
 
   const [achievements, setAchievements] = useState<AchievementResponse[]>([]);
@@ -854,6 +860,7 @@ export function ConquistasTab({ groupId }: { groupId: string }) {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [searching, setSearching] = useState(false);
+  const [wrappedAchievement, setWrappedAchievement] = useState<AchievementResponse | null>(null);
   const fetchIdRef = useRef(0);
   const isInitialLoad = useRef(true);
 
@@ -1189,6 +1196,7 @@ export function ConquistasTab({ groupId }: { groupId: string }) {
             <AchievementCard
               achievement={item}
               index={index}
+              onView={() => setWrappedAchievement(item)}
               onEdit={() => { setEditingAchievement(item); setSheetVisible(true); }}
               onDelete={() => handleDelete(item)}
               onAddEvidence={() => { setEvidenceTargetId(item.id); setEvidenceSheetVisible(true); }}
@@ -1242,6 +1250,12 @@ export function ConquistasTab({ groupId }: { groupId: string }) {
         saving={savingEvidence}
         onClose={() => setEvidenceSheetVisible(false)}
         onSave={handleAddEvidence}
+      />
+
+      <ConquestWrappedCard
+        achievement={wrappedAchievement}
+        visible={wrappedAchievement !== null}
+        onClose={() => setWrappedAchievement(null)}
       />
     </View>
   );
