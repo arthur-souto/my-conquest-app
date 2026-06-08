@@ -16,10 +16,14 @@ public record EvidenceResponse(
                 ? pdfsUrl
                 : imagesUrl;
 
+        String storagePath = summary.getStoragePath().startsWith("http")
+                ? summary.getStoragePath()
+                : baseUrl + "/" + summary.getStoragePath();
+
         return new EvidenceResponse(
                 summary.getAchievementId(),
                 summary.getId(),
-                baseUrl + "/" + summary.getStoragePath(),
+                storagePath,
                 summary.getFileType(),
                 summary.getCaption(),
                 summary.getUploadedAt()
