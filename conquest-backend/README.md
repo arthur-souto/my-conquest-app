@@ -7,6 +7,8 @@ REST API for the Conquest app — tracks personal achievements, groups, and tags
 - **PostgreSQL 16** — persistent storage
 - **Flyway** — versioned schema migrations
 - **Keycloak 26** — identity provider (OAuth2/OIDC)
+- **Cloudflare R2** — object storage for images and PDFs (S3-compatible)
+- **AWS SDK v2** — S3 client used to interact with R2
 - **Springdoc OpenAPI** — auto-generated API docs
 - **Lombok** — boilerplate reduction
 
@@ -47,6 +49,13 @@ All variables have defaults for local development.
 | `JPA_SHOW_SQL`       | `true`                                           | Log SQL queries                |
 | `USERNAME_KEYCLOAK`  | `admin`                                          | Keycloak bootstrap admin user  |
 | `PASSWORD_KEYCLOAK`  | `admin`                                          | Keycloak bootstrap admin pass  |
+| `R2_ACCOUNT_ID`      | *(required)*                                     | Cloudflare account ID          |
+| `R2_ACCESS_KEY`      | *(required)*                                     | R2 API access key              |
+| `R2_SECRET_KEY`      | *(required)*                                     | R2 API secret key              |
+| `R2_BUCKET_IMAGES`   | *(required)*                                     | R2 bucket name for images      |
+| `R2_BUCKET_PDFS`     | *(required)*                                     | R2 bucket name for PDFs        |
+| `R2_PUBLIC_URL_IMAGES` | *(required)*                                   | Public base URL for image bucket |
+| `R2_PUBLIC_URL_PDFS` | *(required)*                                     | Public base URL for PDF bucket |
 
 ## Auth Flow
 
@@ -63,13 +72,36 @@ All other routes require a valid Bearer token.
 
 ## API
 
-| Controller              | Base path         | Responsibility            |
-|-------------------------|-------------------|---------------------------|
+| Controller              | Base path          | Responsibility            |
+|-------------------------|--------------------|---------------------------|
 | `AchievementController` | `/v1/achievements` | CRUD for achievements     |
 | `GroupController`       | `/v1/groups`       | CRUD for groups           |
 | `TagController`         | `/v1/tags`         | CRUD for tags             |
+| `StorageController`     | `/storage`         | Presigned upload URLs     |
 
 Full request/response schemas are available in the Swagger UI.
+
+## Storage (Cloudflare R2)
+
+File uploads are handled via **presigned PUT URLs** — the client uploads directly to R2, the API never proxies the file bytes.
+
+Two separate buckets are used:
+
+| Bucket | Purpose |
+|--------|---------|
+| `R2_BUCKET_IMAGES` | User-uploaded images (e.g. achievement evidence photos) |
+| `R2_BUCKET_PDFS`   | User-uploaded PDF documents |
+
+**Upload flow:**
+
+1. Client calls `GET /storage/image/presigned-url?fileName=...&type=...` (or `/pdf/presigned-url`).
+2. API returns a `uploadUrl` (signed, valid for 5 minutes) and a `publicUrl` (permanent URL after upload).
+3. Client PUTs the file directly to R2 using `uploadUrl`.
+4. Client saves `publicUrl` when creating the related resource.
+
+Object keys follow the pattern `{type}/{userId}/{timestamp}-{fileName}`.
+
+R2 is configured in the `r2` Spring profile (`application-r2.yml`) and is always active via `spring.profiles.include: r2`. Credentials are injected through `R2Properties` (`prefix: r2`) — no defaults are provided, so all seven `R2_*` variables must be set in production.
 
 ## Database
 
