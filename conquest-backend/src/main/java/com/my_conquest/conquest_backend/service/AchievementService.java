@@ -1,5 +1,6 @@
 package com.my_conquest.conquest_backend.service;
 
+import com.my_conquest.conquest_backend.config.R2Properties;
 import com.my_conquest.conquest_backend.dto.request.CreateAchievementRequest;
 import com.my_conquest.conquest_backend.dto.request.CreateEvidenceRequest;
 import com.my_conquest.conquest_backend.dto.request.UpdateAchievementRequest;
@@ -29,6 +30,7 @@ public class AchievementService {
     private final TagRepository tagRepository;
     private final EvidenceRepository evidenceRepository;
     private final GroupRepository groupRepository;
+    private final R2Properties properties;
 
 
     @Transactional
@@ -50,8 +52,10 @@ public class AchievementService {
         Map<UUID, List<TagSummary>> tagsMap = tagRepository.findAllByAchievements(achievementsIds)
                 .stream().collect(Collectors.groupingBy(TagSummary::getAchievementId));
 
-        Map<UUID, List<EvidenceSummary>> evidencesMap = evidenceRepository.findAllByAchievementIds(achievementsIds)
-                .stream().collect(Collectors.groupingBy(EvidenceSummary::getAchievementId));
+        Map<UUID, List<EvidenceResponse>> evidencesMap = evidenceRepository.findAllByAchievementIds(achievementsIds)
+                .stream()
+                .map(e -> EvidenceResponse.from(e, properties.getPublicUrlImages(), properties.getPublicUrlPdfs()))
+                .collect(Collectors.groupingBy(EvidenceResponse::achievementId));
 
 
         return achievements.map(a -> new AchievementResponse(

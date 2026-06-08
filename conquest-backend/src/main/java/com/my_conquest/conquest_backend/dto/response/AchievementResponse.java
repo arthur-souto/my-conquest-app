@@ -17,6 +17,6 @@ public record AchievementResponse(
     LocalDate achievedAt,
     OffsetDateTime createdAt,
     List<TagSummary> tags,
-    List<EvidenceSummary> evidences
+    List<EvidenceResponse> evidences
 ) {
 }
