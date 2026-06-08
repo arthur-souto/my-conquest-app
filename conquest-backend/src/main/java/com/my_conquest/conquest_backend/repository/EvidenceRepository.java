@@ -24,4 +24,7 @@ public interface EvidenceRepository extends JpaRepository<Evidence, UUID> {
     WHERE a.id IN :achievementIds
 """)
     List<EvidenceSummary> findAllByAchievementIds(@Param("achievementIds") List<UUID> achievementIds);
+
+    @Query("SELECT COUNT(e) FROM Evidence e WHERE e.achievement.group.user.keyCloakId = :keyCloakId")
+    Long countByUserKeyCloakId(@Param("keyCloakId") UUID keyCloakId);
 }
