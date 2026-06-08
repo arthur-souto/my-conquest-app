@@ -1,5 +1,5 @@
- import { api } from "./api";
-  import { IdResponse, Pagination, PaginationRequest } from "./types";
+import { api } from "../lib/api";
+import { IdResponse, Pagination, PaginationRequest } from "./types";
 
   export type AchievementCategory = 'career' | 'personal' | 'learning' | 'fitness';
 

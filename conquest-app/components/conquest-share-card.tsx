@@ -1,10 +1,10 @@
+
 import { AchievementResponse, EvidenceSummary } from "@/services/achievements";
-import { getPublicUrl } from "@/services/bucket";
 import { Feather } from "@expo/vector-icons";
 import { Dimensions, Image, Text, View } from "react-native";
 
 const { width: SCREEN_W } = Dimensions.get("window");
-const BUCKET_IMAGES = "achievements-images";
+
 
 export type Template = "casual" | "professional";
 
@@ -15,13 +15,6 @@ export function toDisplay(iso: string): string {
     String(dt.getUTCMonth() + 1).padStart(2, "0"),
     dt.getUTCFullYear(),
   ].join("/");
-}
-
-export function resolveImageUri(storagePath: string): string {
-  if (storagePath.startsWith("file://") || storagePath.startsWith("ph://")) {
-    return storagePath;
-  }
-  return getPublicUrl(BUCKET_IMAGES, storagePath);
 }
 
 function difficultyPhrase(level: number): string {
@@ -53,7 +46,7 @@ export function ShareCard({
   // Evidência compartilhada pelos dois templates
   const evidenceNode = selectedEvidence && isImage ? (
     <Image
-      source={{ uri: resolveImageUri(selectedEvidence.storagePath) }}
+      source={{ uri: selectedEvidence.storagePath }}
       style={{ width: "100%", height: 170, borderRadius: 14, marginBottom: 20 }}
       resizeMode="cover"
     />

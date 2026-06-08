@@ -1,12 +1,12 @@
-import { UserBar } from "@/components/user-bar";
 import {
   Toast,
   ToastDescription,
   ToastTitle,
   useToast,
 } from "@/components/ui/toast";
+import { UserBar } from "@/components/user-bar";
 import { useUser } from "@/contexts/user";
-import { getPublicUrl, uploadImageFromDevice } from "@/services/bucket";
+import { uploadImageFromDevice } from "@/lib/storage-R2";
 import { updateCredentials, updateProfileImage } from "@/services/user";
 import { Feather } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -22,8 +22,6 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-const BUCKET = "achievements-images";
 
 function Field({
   label,
@@ -105,10 +103,9 @@ export default function UserScreen() {
   const handlePickPhoto = async () => {
     setUploadingPhoto(true);
     try {
-      const result = await uploadImageFromDevice(BUCKET, "profile");
+      const result = await uploadImageFromDevice({ type: "profile" });
       if (!result) return;
-      const url = getPublicUrl(BUCKET, result.path);
-      await updateProfileImage(url);
+      await updateProfileImage(result.storagePath);
       await refresh();
       showSuccess("Foto atualizada com sucesso.");
     } catch {

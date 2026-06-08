@@ -5,6 +5,7 @@ import {
   ToastTitle,
   useToast,
 } from "@/components/ui/toast";
+import { deleteFile, uploadFileDirectly } from "@/lib/storage-R2";
 import {
   AchievementCategory,
   AchievementResponse,
@@ -17,13 +18,11 @@ import {
   removeTag,
   updateAchievement,
 } from "@/services/achievements";
-import { deleteFiles, getPublicUrl, uploadFile } from "@/services/bucket";
 import AsyncStorageImpl from "@/services/storage";
 import { getMyTags, Tag } from "@/services/tag";
 import { Feather } from "@expo/vector-icons";
-import { decode } from "base64-arraybuffer";
 import * as DocumentPicker from "expo-document-picker";
-import * as FileSystemLegacy from "expo-file-system/legacy";
+import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import * as WebBrowser from "expo-web-browser";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -32,7 +31,6 @@ import {
   Alert,
   Animated,
   FlatList,
-  Image,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -43,8 +41,6 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-// ─── Constants ───────────────────────────────────────────────────────────────
 
 const PAGE_SIZE = 20;
 
@@ -61,7 +57,6 @@ function toISO(str: string): string {
   return new Date(`${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}T12:00:00.000Z`).toISOString();
 }
 
-// ISO string → DD/MM/AAAA
 function toDisplay(iso: string): string {
   const dt = new Date(iso);
   return [
@@ -74,13 +69,6 @@ function toDisplay(iso: string): string {
 const DATE_REGEX = /^\d{2}\/\d{2}\/\d{4}$/;
 const todayDisplay = toDisplay(new Date().toISOString());
 
-const BUCKET_IMAGES = "achievements-images";
-const BUCKET_DOCS = "achievements-docs";
-
-function bucketFor(fileType: string | null) {
-  return fileType?.startsWith("image/") ? BUCKET_IMAGES : BUCKET_DOCS;
-}
-
 async function getStorageUserId(): Promise<string | null> {
   try {
     const raw = await AsyncStorageImpl.getItem(AsyncStorageImpl.TOKEN_KEY);
@@ -92,11 +80,6 @@ async function getStorageUserId(): Promise<string | null> {
   } catch {
     return null;
   }
-}
-
-function resolveUri(storagePath: string, fileType: string | null): string {
-  if (storagePath.startsWith("file://") || storagePath.startsWith("ph://")) return storagePath;
-  return getPublicUrl(bucketFor(fileType), storagePath);
 }
 
 // ─── Small shared components ──────────────────────────────────────────────────
@@ -203,9 +186,10 @@ function ImageViewerModal({
         <View className="flex-1">
           {evidence && (
             <Image
-              source={{ uri: resolveUri(evidence.storagePath, evidence.fileType) }}
+              source={{ uri: evidence.storagePath }}
               style={{ flex: 1, width: "100%" }}
-              resizeMode="contain"
+              contentFit="cover"
+              cachePolicy="memory-disk"
             />
           )}
         </View>
@@ -326,17 +310,18 @@ function AchievementCard({
                     if (isImage) {
                       setViewingEvidence(ev);
                     } else {
-                      WebBrowser.openBrowserAsync(resolveUri(ev.storagePath, ev.fileType));
+                      WebBrowser.openBrowserAsync(ev.storagePath);
                     }
                   }}
                   className="active:opacity-70"
                 >
                   {isImage ? (
-                    <Image
-                      source={{ uri: resolveUri(ev.storagePath, ev.fileType) }}
-                      className="w-16 h-16 rounded-md bg-[#1f1f1f]"
-                      resizeMode="cover"
-                    />
+                  <Image
+                   source={{ uri: ev.storagePath }}
+                   style={{ width: 64, height: 64, borderRadius: 8 }}
+                  contentFit="cover"
+                  cachePolicy="memory-disk"
+/>
                   ) : (
                     <View className="w-16 h-16 rounded-md bg-[#1a1a1a] border border-[#1f1f1f] items-center justify-center gap-1">
                       <Feather name="file-text" size={22} color="#666666" />
@@ -359,7 +344,11 @@ function AchievementCard({
         <ImageViewerModal
           evidence={viewingEvidence}
           onClose={() => setViewingEvidence(null)}
-          onRemove={() => onRemoveEvidence(viewingEvidence!.id)}
+          onRemove={() => {
+            if(viewingEvidence?.id) {
+              onRemoveEvidence(viewingEvidence.id)
+            }
+          } }
         />
 
         {/* Footer: tags + add evidence */}
@@ -762,8 +751,8 @@ function EvidenceSheet({
               {isImage ? (
                 <Image
                   source={{ uri: file.uri }}
-                  className="w-full h-48 rounded-md bg-[#1f1f1f]"
-                  resizeMode="cover"
+                  style={{ width: "100%", height: 192, borderRadius: 8 }}
+                  contentFit="cover"
                 />
               ) : (
                 <View className="w-full h-24 rounded-md bg-[#1a1a1a] border border-[#1f1f1f] flex-row items-center px-5 gap-4">
@@ -1006,76 +995,75 @@ export default function ConquistasTab({ groupId }: { groupId: string }) {
 
   // ── Evidence ──
 
-  const handleAddEvidence = async (data: {
-    localUri: string;
-    fileType: string;
-    caption: string;
-  }) => {
-    if (!evidenceTargetId) return;
-    setSavingEvidence(true);
+const handleAddEvidence = async (data: {
+  localUri: string;
+  fileType: string;
+  caption: string;
+}) => {
+  if (!evidenceTargetId) return;
+  setSavingEvidence(true);
 
-    const userId = await getStorageUserId();
-    if (!userId) {
-      showError("Usuário não autenticado");
-      setSavingEvidence(false);
-      return;
-    }
+  const userId = await getStorageUserId();
+  if (!userId) {
+    showError("Usuário não autenticado");
+    setSavingEvidence(false);
+    return;
+  }
 
-    const ext = data.fileType.split("/")[1] ?? "jpg";
-    const storagePath = `${userId}/${evidenceTargetId}/${Date.now()}.${ext}`;
+  const tempEvidenceId = `temp_ev_${Date.now()}`;
+  const tempEvidence = {
+    id: tempEvidenceId,
+    storagePath: data.localUri,
+    fileType: data.fileType,
+    caption: data.caption || null,
+    uploadedAt: new Date().toISOString(),
+  };
 
-    const tempEvidenceId = `temp_ev_${Date.now()}`;
-    const tempEvidence = {
-      id: tempEvidenceId,
-      storagePath: data.localUri,
+  setAchievements((cur) =>
+    cur.map((a) =>
+      a.id === evidenceTargetId ? { ...a, evidences: [...a.evidences, tempEvidence] } : a
+    )
+  );
+  setEvidenceSheetVisible(false);
+
+  try {
+    const { storagePath } = await uploadFileDirectly({
+      localUri: data.localUri,
       fileType: data.fileType,
-      caption: data.caption || null,
-      uploadedAt: new Date().toISOString(),
-    };
+      type: evidenceTargetId,
+    });
+
+    const { id } = await addEvidence(groupId, evidenceTargetId, {
+      storagePath,
+      fileType: data.fileType,
+      caption: data.caption || undefined,
+    });
 
     setAchievements((cur) =>
       cur.map((a) =>
-        a.id === evidenceTargetId ? { ...a, evidences: [...a.evidences, tempEvidence] } : a
+        a.id === evidenceTargetId
+          ? {
+              ...a,
+              evidences: a.evidences.map((ev) =>
+                ev.id === tempEvidenceId ? { ...ev, id, storagePath } : ev
+              ),
+            }
+          : a
       )
     );
-    setEvidenceSheetVisible(false);
-
-    try {
-      const base64 = await FileSystemLegacy.readAsStringAsync(data.localUri, { encoding: "base64" });
-      await uploadFile(bucketFor(data.fileType), storagePath, decode(base64), data.fileType);
-
-      const { id } = await addEvidence(groupId, evidenceTargetId, {
-        storagePath,
-        fileType: data.fileType,
-        caption: data.caption || undefined,
-      });
-
-      setAchievements((cur) =>
-        cur.map((a) =>
-          a.id === evidenceTargetId
-            ? {
-                ...a,
-                evidences: a.evidences.map((ev) =>
-                  ev.id === tempEvidenceId ? { ...ev, id, storagePath } : ev
-                ),
-              }
-            : a
-        )
-      );
-    } catch {
-      setAchievements((cur) =>
-        cur.map((a) =>
-          a.id === evidenceTargetId
-            ? { ...a, evidences: a.evidences.filter((ev) => ev.id !== tempEvidenceId) }
-            : a
-        )
-      );
-      showError("Falha ao adicionar evidência");
-    } finally {
-      setSavingEvidence(false);
-    }
-  };
-
+  } catch {
+    setAchievements((cur) =>
+      cur.map((a) =>
+        a.id === evidenceTargetId
+          ? { ...a, evidences: a.evidences.filter((ev) => ev.id !== tempEvidenceId) }
+          : a
+      )
+    );
+    showError("Falha ao adicionar evidência");
+  } finally {
+    setSavingEvidence(false);
+  }
+};
   const handleRemoveEvidence = async (achievementId: string, evidenceId: string) => {
     const achievement = achievements.find((a) => a.id === achievementId);
     const evidence = achievement?.evidences.find((ev) => ev.id === evidenceId);
@@ -1095,7 +1083,7 @@ export default function ConquistasTab({ groupId }: { groupId: string }) {
         !evidence.storagePath.startsWith("file://") &&
         !evidence.storagePath.startsWith("ph://")
       ) {
-        await deleteFiles(bucketFor(evidence.fileType ?? null), [evidence.storagePath]);
+        await deleteFile(evidence.storagePath);
       }
     } catch {
       setAchievements(snapshot);

@@ -80,7 +80,7 @@ export default function HomeScreen() {
           label="API"
           value={"https://api.example.com/v1"}
         />
-        <InfoRow icon="database" label="Storage" value="Supabase Cloud" />
+        <InfoRow icon="database" label="Storage" value="Cloudflare R2" />
         <InfoRow icon="shield" label="Auth" value="JWT · Spring Security" />
 
         <View className="border-t border-[#1f1f1f] pt-4 gap-1">

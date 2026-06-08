@@ -1,4 +1,4 @@
-import { api } from "./api";
+import { api } from "../lib/api";
 
 const KEYCLOAK_URL = process.env.EXPO_PUBLIC_KEYCLOAK_URL!;
 const REALM = process.env.EXPO_PUBLIC_KEYCLOAK_REALM!;

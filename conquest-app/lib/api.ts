@@ -1,5 +1,5 @@
 import axios from "axios";
-import AsyncStorageImpl from "./storage";
+import AsyncStorageImpl from "../services/storage";
 
 export const api = axios.create({
   baseURL: process.env.EXPO_PUBLIC_API_URL,

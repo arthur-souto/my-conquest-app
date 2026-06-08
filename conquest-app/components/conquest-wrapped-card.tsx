@@ -17,7 +17,7 @@ import {
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ViewShot, { ViewShotRef } from "react-native-view-shot";
-import { resolveImageUri, ShareCard, Template, toDisplay } from "./conquest-share-card";
+import { ShareCard, Template, toDisplay } from "./conquest-share-card";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 
@@ -406,7 +406,7 @@ export function ConquestWrappedCard({ achievement, visible, onClose }: Props) {
                       }}
                     >
                       <Image
-                        source={{ uri: resolveImageUri(item.storagePath) }}
+                        source={{ uri: item.storagePath }}
                         style={{ width: "100%", height: "100%" }}
                         resizeMode="cover"
                       />
@@ -531,7 +531,7 @@ export function ConquestWrappedCard({ achievement, visible, onClose }: Props) {
                         >
                           {evIsImage ? (
                             <Image
-                              source={{ uri: resolveImageUri(ev.storagePath) }}
+                              source={{ uri: ev.storagePath }}
                               style={{ width: "100%", height: "100%" }}
                               resizeMode="cover"
                             />
