@@ -1,0 +1,8 @@
+r2:
+  account-id: ${R2_ACCOUNT_ID}
+  access-key: ${R2_ACCESS_KEY}
+  secret-key: ${R2_SECRET_KEY}
+  bucket-images: ${R2_BUCKET_IMAGES}
+  bucket-pdfs: ${R2_BUCKET_PDFS}
+  public-url-images: ${R2_PUBLIC_URL_IMAGES}
+  public-url-pdfs: ${R2_PUBLIC_URL_PDFS}

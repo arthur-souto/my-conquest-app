@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    include: r2
   application:
     name: conquest-backend
   datasource:
@@ -30,8 +32,6 @@ app:
     url: ${FRONTEND_URL:http://localhost:5173}
   # Set to true in development/staging, false in production
   include-error-details: ${INCLUDE_ERROR_DETAILS:false}
-
-
 
 springdoc:
   swagger-ui:
